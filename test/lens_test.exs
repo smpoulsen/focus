@@ -1,5 +1,5 @@
-defmodule Functorial.LensTest do
+defmodule Focus.LensTest do
   use ExUnit.Case
-  doctest Functorial.Lens
+  doctest Focus.Lens
 
 end

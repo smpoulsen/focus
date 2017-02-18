@@ -1,5 +1,5 @@
-defmodule Functorial.Lens do
-  alias Functorial.Lens
+defmodule Focus.Lens do
+  alias Focus.Lens
 
   @moduledoc """
   Experimenting with functional lenses.
@@ -19,7 +19,7 @@ defmodule Functorial.Lens do
 
   ## Examples
 
-      iex> alias Functorial.Lens
+      iex> alias Focus.Lens
       iex> person = %{name: "Homer"}
       iex> nameLens = Lens.makeLens(:name)
       iex> nameLens.getter.(person)
@@ -56,7 +56,7 @@ defmodule Functorial.Lens do
 
   ## Examples
 
-      iex> alias Functorial.Lens
+      iex> alias Focus.Lens
       iex> marge = %{name: "Marge", address: %{street: "123 Fake St.", city: "Springfield"}}
       iex> addressLens = Lens.makeLens(:address)
       iex> streetLens = Lens.makeLens(:street)
@@ -81,8 +81,8 @@ defmodule Functorial.Lens do
   Infix lens composition
 
   ## Examples
-      iex> import Functorial.Lens
-      iex> alias Functorial.Lens
+      iex> import Focus.Lens
+      iex> alias Focus.Lens
       iex> marge = %{name: "Marge", address: %{
       ...>   local: %{number: 123, street: "Fake St."},
       ...>   city: "Springfield"}
@@ -102,7 +102,7 @@ defmodule Functorial.Lens do
 
   ## Examples
 
-      iex> alias Functorial.Lens
+      iex> alias Focus.Lens
       iex> marge = %{name: "Marge", address: %{street: "123 Fake St.", city: "Springfield"}}
       iex> nameLens = Lens.makeLens(:name)
       iex> Lens.view!(nameLens, marge)
@@ -119,7 +119,7 @@ defmodule Functorial.Lens do
 
   ## Examples
 
-      iex> alias Functorial.Lens
+      iex> alias Focus.Lens
       iex> marge = %{name: "Marge", address: %{street: "123 Fake St.", city: "Springfield"}}
       iex> nameLens = Lens.makeLens(:name)
       iex> Lens.view(nameLens, marge)
@@ -139,7 +139,7 @@ defmodule Functorial.Lens do
   Modify the part of a data structure that a lens focuses on.
 
   ## Examples
-      iex> alias Functorial.Lens
+      iex> alias Focus.Lens
       iex> marge = %{name: "Marge", address: %{street: "123 Fake St.", city: "Springfield"}}
       iex> nameLens = Lens.makeLens(:name)
       iex> Lens.over(nameLens, &String.upcase/1, marge)
@@ -157,13 +157,13 @@ defmodule Functorial.Lens do
 
   ## Examples
 
-      iex> alias Functorial.Lens
+      iex> alias Focus.Lens
       iex> marge = %{name: "Marge", address: %{street: "123 Fake St.", city: "Springfield"}}
       iex> nameLens = Lens.makeLens(:name)
       iex> Lens.set(nameLens, "Homer", marge)
       %{name: "Homer", address: %{street: "123 Fake St.", city: "Springfield"}}
 
-      iex> alias Functorial.Lens
+      iex> alias Focus.Lens
       iex> marge = %{name: "Marge", address: %{street: "123 Fake St.", city: "Springfield"}}
       iex> addressLens = Lens.makeLens(:address)
       iex> streetLens = Lens.makeLens(:street)

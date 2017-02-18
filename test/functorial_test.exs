@@ -1,12 +1,12 @@
-defmodule FunctorialTest do
+defmodule FocusTest do
   use ExUnit.Case
-  import Functorial
-  doctest Functorial
+  import Focus
+  doctest Focus
 
   test "compose/2 composes two functions" do
     f = fn x -> x + 2 end
     g = fn y -> y * 3 end
-    f_of_g = Functorial.compose(f, g)
+    f_of_g = Focus.compose(f, g)
 
     assert f_of_g.(2) == 8
   end
@@ -15,7 +15,7 @@ defmodule FunctorialTest do
     x = {:ok, 4}
     y = {:error, :bad_arg}
 
-    bound_square = Functorial.bind(fn z -> z * z end)
+    bound_square = Focus.bind(fn z -> z * z end)
     assert bound_square.(x) == {:ok, 16}
     assert bound_square.(y) == {:error, :bad_arg}
   end
@@ -24,7 +24,7 @@ defmodule FunctorialTest do
     f = fn x -> x * 3 end
     g = fn x -> x - 2 end
 
-    assert (Functorial.bind(f) |> Functorial.bind(g)).(Functorial.lift(5)) == {:ok, 13}
+    assert (Focus.bind(f) |> Focus.bind(g)).(Focus.lift(5)) == {:ok, 13}
   end
 
   test "~> functions as bind" do
