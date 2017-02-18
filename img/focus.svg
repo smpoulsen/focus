@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="83px" height="71px" viewBox="0 0 83 71" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 42 (36781) - http://www.bohemiancoding.com/sketch -->
+    <title>focus</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <text id=")" style="mix-blend-mode: hue;" font-family="FiraCode-Light, Fira Code" font-size="72" font-weight="300" letter-spacing="-0.443076909" fill="#4E2A5E">
+            <tspan x="14" y="61">)</tspan>
+        </text>
+        <g id="Group" transform="translate(0.000000, 11.000000)" stroke="#4E2A5E" stroke-width="1.5" stroke-linejoin="bevel" stroke-dasharray="2,1,2,1">
+            <polyline id="Line" points="40 2 59.1610672 12.4929654 82 25"></polyline>
+            <path d="M0,1 L36.5,1" id="Line"></path>
+        </g>
+        <g id="Group-2" transform="translate(41.000000, 48.000000) scale(1, -1) translate(-41.000000, -48.000000) translate(0.000000, 36.000000)" stroke="#4E2A5E" stroke-width="1.5" stroke-dasharray="2,1,2,1" stroke-linejoin="bevel">
+            <path d="M0,0.5 L36.5,0.5" id="Line"></path>
+            <path d="M40,2 L81.5,23.5" id="Line"></path>
+        </g>
+        <path d="M0.5,35.75 L82.5,35.75" id="Line" stroke="#4E2A5E" stroke-width="1.5" stroke-linejoin="bevel" stroke-dasharray="2,1,2,1"></path>
+    </g>
+</svg>

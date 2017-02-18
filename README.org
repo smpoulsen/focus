@@ -1,6 +1,9 @@
 * Focus
 
-An experiment with lenses.
+#+ATTR_HTML: :style margin-left: auto; margin-right: auto;
+[[img/focus.png]]
+
+An experiment with functional optics.
 
 #+BEGIN_QUOTE
 A lens is a value that composes a getter and a setter function to produce a bidirectional view into a data structure. This definition is intentionally broad—lenses are a very general concept, and they can be applied to almost any kind of value that encapsulates data.
