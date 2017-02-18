@@ -24,6 +24,7 @@ defmodule Focus.Mixfile do
 
   defp deps do
     [
+      {:ex_doc, ">= 0.0.0", only: :dev},
       {:credo, "~> 0.5.3", only: [:dev, :test]},
       {:dialyxir, "~> 0.4.3", only: [:dev, :test]},
       {:quixir, "~> 0.9.1", only: [:test]}
