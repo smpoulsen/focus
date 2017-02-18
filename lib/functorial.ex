@@ -1,4 +1,4 @@
-defmodule Functorial do
+defmodule Focus do
   @doc """
   Right to left function composition
 

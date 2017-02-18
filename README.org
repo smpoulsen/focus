@@ -1,0 +1,29 @@
+* Focus
+
+An experiment with lenses.
+
+#+BEGIN_QUOTE
+A lens is a value that composes a getter and a setter function to produce a bidirectional view into a data structure. This definition is intentionally broad—lenses are a very general concept, and they can be applied to almost any kind of value that encapsulates data.
+  -- [[https:docs.racket-lang.org/lens/lens-intro.html][Racket 'lens' documentation]] 
+#+END_QUOTE 
+
+** Installation
+
+If [[https://hex.pm/docs/publish][available in Hex]], the package can be installed as:
+
+  1. Add `focus` to your list of dependencies in `mix.exs`:
+
+    ```elixir
+    def deps do
+      [{:focus, "~> 0.1.0"}]
+    end
+    ```
+
+  2. Ensure `focus` is started before your application:
+
+    ```elixir
+    def application do
+      [applications: [:focus]]
+    end
+    ```
+
