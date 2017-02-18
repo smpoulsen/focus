@@ -30,9 +30,9 @@ defmodule Focus.Lens do
   @spec makeLens(list) :: Lens.t
   def makeLens(path) do
     %Lens{
-      getter: fn s-> getter(s, path) end,
+      getter: fn s -> getter(s, path) end,
       setter: fn s ->
-        fn f->
+        fn f ->
           setter(s, path, f)
         end
       end
@@ -47,7 +47,8 @@ defmodule Focus.Lens do
   defp setter(s, x, f) when is_map(s), do: Map.put(s, x, f)
   defp setter(s, x, f) when is_list(s), do: List.replace_at(s, x, f)
   defp setter(s, x, f) when is_tuple(s) do
-    Tuple.delete_at(s, x)
+    s
+    |> Tuple.delete_at(x)
     |> Tuple.insert_at(x, f)
   end
 
