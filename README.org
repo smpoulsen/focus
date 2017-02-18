@@ -27,3 +27,7 @@ If [[https://hex.pm/docs/publish][available in Hex]], the package can be install
     end
     ```
 
+** References
++ [[https://www.schoolofhaskell.com/user/tel/a-little-lens-starter-tutorial][A Little Lens Starter Tutorial]]
++ [[https://www21.in.tum.de/teaching/fp/SS15/papers/17.pdf][Lenses in Functional Programming]]
++ [[https://hackage.haskell.org/package/lens-tutorial-1.0.2/docs/Control-Lens-Tutorial.html][Control.Lens Tutorial]]
