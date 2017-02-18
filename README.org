@@ -58,7 +58,7 @@ Their real utility comes in operating on nested data. Lenses can be created by c
   }
 
   # To access the street, we can compose the lenses that lead there from the top level.
-  # Lenses can be composed with Focus.Lens.compose, or the infix (~>) operator.
+  # Lenses can be composed with Focus.Lens.compose/2, or the infix (~>) operator.
 
   address = Focus.Lens.makeLens(:address)
   locale =  Focus.Lens.makeLens(:locale)
@@ -87,6 +87,14 @@ Their real utility comes in operating on nested data. Lenses can be created by c
   # }
 #+END_SRC
 
+** Functions 
+  + Focus.Lens.makeLens/1
+  + Focus.Lens.compose/2 (~>)
+  + Focus.Lens.view!/2
+  + Focus.Lens.view/2
+  + Focus.Lens.set/3
+  + Focus.Lens.over/3
+  + Focus.Lens.apply_list/2
 ** Installation
 
 If [[https://hex.pm/docs/publish][available in Hex]], the package can be installed as:
