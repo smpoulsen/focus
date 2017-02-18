@@ -24,6 +24,7 @@ defmodule Focus.LensTest do
 
     {:ok, test_structure: test_structure}
   end
+
   test "lens law - get a value that is set" do
     ptest structure: map(like: %{name: string()}), new_name: string() do
       lens = Lens.makeLens(:name)
@@ -35,6 +36,13 @@ defmodule Focus.LensTest do
     ptest structure: map(like: %{name: string()}) do
       lens = Lens.makeLens(:name)
       assert Lens.set(lens, Lens.view!(lens, structure), structure) == structure
+    end
+  end
+
+  test "lens law - last set value wins" do
+    ptest structure: map(like: %{name: string()}), name1: string(), name2: string() do
+      lens = Lens.makeLens(:name)
+      assert Lens.view!(lens, Lens.set(lens, name2, Lens.set(lens, name1, structure))) == name2
     end
   end
 
