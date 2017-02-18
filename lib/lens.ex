@@ -78,6 +78,26 @@ defmodule Functorial.Lens do
   end
 
   @doc """
+  Infix lens composition
+
+  ## Examples
+      iex> import Functorial.Lens
+      iex> alias Functorial.Lens
+      iex> marge = %{name: "Marge", address: %{
+      ...>   local: %{number: 123, street: "Fake St."},
+      ...>   city: "Springfield"}
+      ...> }
+      iex> addressLens = Lens.makeLens(:address)
+      iex> localLens = Lens.makeLens(:local)
+      iex> streetLens = Lens.makeLens(:street)
+      iex> addressLens ~> localLens ~> streetLens |> Lens.view!(marge)
+      "Fake St."
+  """
+  def x ~> y do
+    Lens.compose(x, y)
+  end
+
+  @doc """
   Get a piece of a data structure that a lens focuses on.
 
   ## Examples
