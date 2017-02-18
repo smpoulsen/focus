@@ -2,4 +2,6 @@
   "credo": {:hex, :credo, "0.5.3", "0c405b36e7651245a8ed63c09e2d52c2e2b89b6d02b1570c4d611e0fcbecf4a2", [:mix], [{:bunt, "~> 0.1.6", [hex: :bunt, optional: false]}]},
   "dialyxir": {:hex, :dialyxir, "0.4.4", "e93ff4affc5f9e78b70dc7bec7b07da44ae1ed3fef38e7113568dd30ad7b01d3", [:mix], []},
   "excheck": {:hex, :excheck, "0.5.3", "7326a29cc5fdb6900e66dac205a6a70cc994e2fe037d39136817d7dab13cdabf", [:mix], []},
+  "pollution": {:hex, :pollution, "0.9.0", "2d172aeedc444f0fc06a69b03bb6a560fb141bcafcc0c8189c29b10ee6e50893", [:mix], []},
+  "quixir": {:hex, :quixir, "0.9.1", "b9a45930f330ba485c1cb976afc9f5ceb14ebbe10faf755e0796bb971396c37c", [:mix], [{:pollution, "~> 0.9", [hex: :pollution, optional: false]}]},
   "triq": {:git, "https://github.com/triqng/triq.git", "2c497398e020e06db8496f1d89f12481cc5adab9", []}}

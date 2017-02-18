@@ -30,8 +30,7 @@ defmodule Focus.Mixfile do
     [
       {:credo, "~> 0.5.3", only: [:dev, :test]},
       {:dialyxir, "~> 0.4.3", only: [:dev, :test]},
-      {:excheck, "~> 0.5", only: :test},
-      {:triq, github: "triqng/triq", only: :test},
+      {:quixir, "~> 0.9.1"}
     ]
   end
 end
