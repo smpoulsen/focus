@@ -82,6 +82,7 @@ defmodule Focus.Lens do
   Infix lens composition
 
   ## Examples
+
       iex> import Focus.Lens
       iex> alias Focus.Lens
       iex> marge = %{name: "Marge", address: %{
@@ -135,11 +136,34 @@ defmodule Focus.Lens do
     end
   end
 
+  @doc """
+  Fix Lens.view!/2 on a given lens. This partially applies Lens.view/2 with the given
+  lens and returns a function that takes a traversable structure.
+
+  ## Examples
+
+      iex> alias Focus.Lens
+      iex> viewName = Lens.makeLens(:name)
+      ...> |> Lens.fixView
+      iex> homer = %{name: "Homer"}
+      iex> viewName.(homer)
+      "Homer"
+      iex> [homer, %{name: "Marge"}, %{name: "Bart"}]
+      ...> |> Enum.map(&viewName.(&1))
+      ["Homer", "Marge", "Bart"]
+  """
+  @spec fixView(Lens.t) :: (traversable -> any)
+  def fixView(%Lens{} = lens) do
+    fn structure ->
+      Lens.view!(lens, structure)
+    end
+  end
 
   @doc """
   Modify the part of a data structure that a lens focuses on.
 
   ## Examples
+
       iex> alias Focus.Lens
       iex> marge = %{name: "Marge", address: %{street: "123 Fake St.", city: "Springfield"}}
       iex> nameLens = Lens.makeLens(:name)
@@ -150,6 +174,26 @@ defmodule Focus.Lens do
   def over(%Lens{setter: setter} = lens, structure, f) do
     with {:ok, d} <- Lens.view(lens, structure) do
       setter.(structure).(f.(d))
+    end
+  end
+
+  @doc """
+  Partially apply a lens to Lens.over/3, returning a function that takes a
+  traversable and an update function.
+
+  ## Examples
+
+  iex> alias Focus.Lens
+  iex> upcaseName = Lens.makeLens(:name)
+  ...> |> Lens.fixOver(&String.upcase/1)
+  iex> %{name: "Bart", parents: {"Homer", "Marge"}}
+  ...> |> upcaseName.()
+  %{name: "BART", parents: {"Homer", "Marge"}}
+  """
+  @spec fixOver(Lens.t, ((any) -> any)) :: ((traversable) -> traversable)
+  def fixOver(%Lens{} = lens, f \\ fn x -> x end) when is_function(f) do
+    fn structure ->
+      Lens.over(lens, structure, f)
     end
   end
 
@@ -180,12 +224,36 @@ defmodule Focus.Lens do
   end
 
   @doc """
+  Partially apply a lens to Lens.set/3, returning a function that takes a
+  traversable and a new value.
+
+  ## Examples
+
+      iex> alias Focus.Lens
+      iex> nameSetter = Lens.makeLens(:name)
+      ...> |> Lens.fixSet
+      iex> %{name: "Bart", parents: {"Homer", "Marge"}}
+      ...> |> nameSetter.("Lisa")
+      %{name: "Lisa", parents: {"Homer", "Marge"}}
+  """
+  @spec fixSet(Lens.t) :: ((traversable, any) -> traversable)
+  def fixSet(%Lens{} = lens) do
+    fn structure, val ->
+      Lens.set(lens, structure, val)
+    end
+  end
+
+  @doc """
   Given a list of lenses and a structure, apply Lens.view for each lens
   to the structure.
 
   ## Examples
 
-      iex> homer = %{name: "Homer", job: "Nuclear Safety Inspector", children: ["Bart", "Lisa", "Maggie"]}
+      iex> homer = %{
+      ...>   name: "Homer",
+      ...>   job: "Nuclear Safety Inspector",
+      ...>   children: ["Bart", "Lisa", "Maggie"]
+      ...> }
       iex> lenses = [Focus.Lens.makeLens(:name), Focus.Lens.makeLens(:children)]
       iex> Focus.Lens.apply_list(lenses, homer)
       ["Homer", ["Bart", "Lisa", "Maggie"]]
