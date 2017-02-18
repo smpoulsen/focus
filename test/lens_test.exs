@@ -28,21 +28,21 @@ defmodule Focus.LensTest do
   test "lens law - get a value that is set" do
     ptest structure: map(like: %{name: string()}), new_name: string() do
       lens = Lens.makeLens(:name)
-      assert Lens.view!(lens, Lens.set(lens, new_name, structure)) == new_name
+      assert Lens.view!(lens, Lens.set(lens, structure, new_name)) == new_name
     end
   end
 
   test "lens law - setting a value that is retrieved is doing nothing" do
     ptest structure: map(like: %{name: string()}) do
       lens = Lens.makeLens(:name)
-      assert Lens.set(lens, Lens.view!(lens, structure), structure) == structure
+      assert Lens.set(lens, structure, Lens.view!(lens, structure)) == structure
     end
   end
 
   test "lens law - last set value wins" do
     ptest structure: map(like: %{name: string()}), name1: string(), name2: string() do
       lens = Lens.makeLens(:name)
-      assert Lens.view!(lens, Lens.set(lens, name2, Lens.set(lens, name1, structure))) == name2
+      assert Lens.view!(lens, Lens.set(lens, Lens.set(lens, structure, name1), name2)) == name2
     end
   end
 
@@ -54,12 +54,13 @@ defmodule Focus.LensTest do
 
   test "set data in a map", %{test_structure: test_structure} do
     nameLens = Lens.makeLens(:name)
-    assert Lens.set(nameLens, "Bart", test_structure) == %{test_structure | name: "Bart"}
+    assert Lens.set(nameLens, test_structure, "Bart") == %{test_structure | name: "Bart"}
   end
 
   test "manipulate data in a map", %{test_structure: test_structure} do
     nameLens = Lens.makeLens(:name)
-    assert Lens.over(nameLens, &String.reverse/1, test_structure) == %{test_structure | name: "remoH"}
+    assert Lens.over(nameLens, test_structure, &String.reverse/1) ==
+      %{test_structure | name: "remoH"}
   end
 
   test "get data from a list", %{test_structure: test_structure} do
@@ -72,13 +73,15 @@ defmodule Focus.LensTest do
   test "set data in a list", %{test_structure: test_structure} do
     listLens = Lens.makeLens(:list)
     secondElem = Lens.makeLens(1)
-    assert (listLens ~> secondElem |> Lens.set("Banana", test_structure)) == %{test_structure | list: [2, "Banana", 8, 16, 32]}
+    assert (listLens ~> secondElem |> Lens.set(test_structure, "Banana")) ==
+      %{test_structure | list: [2, "Banana", 8, 16, 32]}
   end
 
   test "manipulate data in a list", %{test_structure: test_structure} do
     listLens = Lens.makeLens(:list)
     secondElem = Lens.makeLens(1)
-    assert (listLens ~> secondElem |> Lens.over(fn x -> x * x * x end, test_structure)) == %{test_structure | list: [2, 64, 8, 16, 32]}
+    assert (listLens ~> secondElem |> Lens.over(test_structure, fn x -> x * x * x end)) ==
+      %{test_structure | list: [2, 64, 8, 16, 32]}
   end
 
   test "get data from a tuple", %{test_structure: test_structure} do
@@ -91,13 +94,15 @@ defmodule Focus.LensTest do
   test "set data in a tuple", %{test_structure: test_structure} do
     tupleLens = Lens.makeLens(:tuple)
     firstElem = Lens.makeLens(0)
-    assert (tupleLens ~> firstElem |> Lens.set("Pineapple", test_structure)) == %{test_structure | tuple: {"Pineapple", :b, :c}}
+    assert (tupleLens ~> firstElem |> Lens.set(test_structure, "Pineapple")) ==
+      %{test_structure | tuple: {"Pineapple", :b, :c}}
   end
 
   test "manipulate data in a tuple", %{test_structure: test_structure} do
     tupleLens = Lens.makeLens(:tuple)
     firstElem = Lens.makeLens(0)
-    assert (tupleLens ~> firstElem |> Lens.over(&Atom.to_string/1, test_structure)) == %{test_structure | tuple: {"a", :b, :c}}
+    assert (tupleLens ~> firstElem |> Lens.over(test_structure, &Atom.to_string/1)) ==
+      %{test_structure | tuple: {"a", :b, :c}}
   end
 
   test "get data from a deep map", %{test_structure: test_structure} do
@@ -112,16 +117,20 @@ defmodule Focus.LensTest do
     address = Lens.makeLens(:address)
     locale = Lens.makeLens(:locale)
     street = Lens.makeLens(:street)
-    assert (address ~> locale ~> street |> Lens.set("Evergreen Terrace", test_structure)) ==
-      %{test_structure | address: %{test_structure.address | locale: %{test_structure.address.locale | street: "Evergreen Terrace"}}}
+    assert (address ~> locale ~> street |> Lens.set(test_structure, "Evergreen Terrace")) ==
+      %{test_structure | address: %{
+           test_structure.address | locale: %{
+             test_structure.address.locale | street: "Evergreen Terrace"}}}
   end
 
   test "manipulate data in a deep map", %{test_structure: test_structure} do
     address = Lens.makeLens(:address)
     locale = Lens.makeLens(:locale)
     street = Lens.makeLens(:street)
-    assert (address ~> locale ~> street |> Lens.over(&String.upcase/1, test_structure)) ==
-      %{test_structure | address: %{test_structure.address | locale: %{test_structure.address.locale | street: "FAKE ST."}}}
+    assert (address ~> locale ~> street |> Lens.over(test_structure, &String.upcase/1)) ==
+      %{test_structure | address: %{
+           test_structure.address | locale: %{
+             test_structure.address.locale | street: "FAKE ST."}}}
   end
 
 end
