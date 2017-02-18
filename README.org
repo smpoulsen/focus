@@ -1,4 +1,6 @@
 * Focus
+[[https://circleci.com/gh/tpoulsen/focus][https://circleci.com/gh/tpoulsen/focus.svg?style=svg]]
+[[https://img.shields.io/hexpm/v/focus.svg]]
 
 #+ATTR_HTML: :style margin-left: auto; margin-right: auto;
 [[img/focus.png]]
