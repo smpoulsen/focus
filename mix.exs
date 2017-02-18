@@ -7,31 +7,37 @@ defmodule Focus.Mixfile do
      elixir: "~> 1.4",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
+     description: description(),
+     package: package(),
      deps: deps()]
   end
 
-  # Configuration for the OTP application
-  #
-  # Type "mix help compile.app" for more information
   def application do
     [applications: [:logger]]
   end
 
-  # Dependencies can be Hex packages:
-  #
-  #   {:mydep, "~> 0.3.0"}
-  #
-  # Or git/path repositories:
-  #
-  #   {:mydep, git: "https://github.com/elixir-lang/mydep.git", tag: "0.1.0"}
-  #
-  # Type "mix help deps" for more examples and options
+  def description() do
+    """
+    This package is an experiment with lenses. It provides the ability to create and compose lenses and apply them to arbitrarily nested maps, lists, and tuples to view, set, and map over the data contained within.
+    """
+  end
+
   defp deps do
     [
       {:credo, "~> 0.5.3", only: [:dev, :test]},
       {:dialyxir, "~> 0.4.3", only: [:dev, :test]},
-      {:excheck, "~> 0.5", only: :test},
-      {:triq, github: "triqng/triq", only: :test},
+      {:quixir, "~> 0.9.1"}
+    ]
+  end
+
+  defp package do
+    [
+      name: :focus,
+      licenses: ["BSD2"],
+      maintainers: ["Travis Poulsen"],
+      links: %{
+        "GitHub" => "https://github.com/tpoulsen/focus",
+      }
     ]
   end
 end

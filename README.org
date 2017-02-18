@@ -7,6 +7,94 @@ A lens is a value that composes a getter and a setter function to produce a bidi
   -- [[https:docs.racket-lang.org/lens/lens-intro.html][Racket 'lens' documentation]] 
 #+END_QUOTE 
 
+** Usage
+
+To construct a lens:
+
+#+BEGIN_SRC elixir
+  # A lens for the key `:name`
+  Focus.Lens.makeLens(:name)
+
+  # A lens for the key `"name"`
+  Focus.Lens.makeLens("name")
+
+  # A lens for the second item in a list/tuple:
+  Focus.Lens.makeLens(1)
+#+END_SRC
+
+Each lens provides both a getter and a setter for the accessor it was created for.
+
+Lenses can be used to access and/or modify structured data:
+
+#+BEGIN_SRC elixir
+  # Extract a value from a simple map:
+
+  person = %{name: "Homer"}
+  nameLens = Focus.Lens.makeLens(:name)
+
+  Focus.Lens.view!(nameLens, person) == "Homer"
+  # true
+
+  Focus.Lens.set(nameLens, person, "Bart")
+  # %{name: "Bart"}
+
+  Focus.Lens.over(nameLens, person, &String.upcase/1)
+  # %{name: "HOMER"}
+#+END_SRC
+
+Their real utility comes in operating on nested data. Lenses can be created by composing other lenses in order to traverse a data structure:
+
+#+BEGIN_SRC elixir
+  person = %{
+    name: "Homer",
+    address: %{
+      locale: %{
+        number: 742,
+        street: "Evergreen Terrace",
+        city: "Springfield",
+      },
+      state: "???"
+    }
+  }
+
+  # To access the street, we can compose the lenses that lead there from the top level.
+  # Lenses can be composed with Focus.Lens.compose/2, or the infix (~>) operator.
+
+  address = Focus.Lens.makeLens(:address)
+  locale =  Focus.Lens.makeLens(:locale)
+  street =  Focus.Lens.makeLens(:street)
+
+  address
+  ~> locale
+  ~> street
+  |> Focus.Lens.view!(person)
+  # "Evergreen Terrace"
+
+  address
+  ~> locale
+  ~> street
+  |> Focus.Lens.set(person, "Fake Street")
+  # person = %{
+  #   name: "Homer",
+  #   address: %{
+  #     locale: %{
+  #       number: 742,
+  #       street: "Fake Street",
+  #       city: "Springfield",
+  #     },
+  #     state: "???"
+  #   }
+  # }
+#+END_SRC
+
+** Functions 
+  + Focus.Lens.makeLens/1
+  + Focus.Lens.compose/2 (~>)
+  + Focus.Lens.view!/2
+  + Focus.Lens.view/2
+  + Focus.Lens.set/3
+  + Focus.Lens.over/3
+  + Focus.Lens.apply_list/2
 ** Installation
 
 If [[https://hex.pm/docs/publish][available in Hex]], the package can be installed as:
@@ -27,3 +115,7 @@ If [[https://hex.pm/docs/publish][available in Hex]], the package can be install
     end
     ```
 
+** References
++ [[https://www.schoolofhaskell.com/user/tel/a-little-lens-starter-tutorial][A Little Lens Starter Tutorial]]
++ [[https://www21.in.tum.de/teaching/fp/SS15/papers/17.pdf][Lenses in Functional Programming]]
++ [[https://hackage.haskell.org/package/lens-tutorial-1.0.2/docs/Control-Lens-Tutorial.html][Control.Lens Tutorial]]

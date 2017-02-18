@@ -143,11 +143,11 @@ defmodule Focus.Lens do
       iex> alias Focus.Lens
       iex> marge = %{name: "Marge", address: %{street: "123 Fake St.", city: "Springfield"}}
       iex> nameLens = Lens.makeLens(:name)
-      iex> Lens.over(nameLens, &String.upcase/1, marge)
+      iex> Lens.over(nameLens, marge, &String.upcase/1)
       %{name: "MARGE", address: %{street: "123 Fake St.", city: "Springfield"}}
   """
-  @spec over(Lens.t, (any -> any), traversable) :: traversable
-  def over(%Lens{setter: setter} = lens, f, structure) do
+  @spec over(Lens.t, traversable, (any -> any)) :: traversable
+  def over(%Lens{setter: setter} = lens, structure, f) do
     with {:ok, d} <- Lens.view(lens, structure) do
       setter.(structure).(f.(d))
     end
@@ -161,7 +161,7 @@ defmodule Focus.Lens do
       iex> alias Focus.Lens
       iex> marge = %{name: "Marge", address: %{street: "123 Fake St.", city: "Springfield"}}
       iex> nameLens = Lens.makeLens(:name)
-      iex> Lens.set(nameLens, "Homer", marge)
+      iex> Lens.set(nameLens, marge, "Homer")
       %{name: "Homer", address: %{street: "123 Fake St.", city: "Springfield"}}
 
       iex> alias Focus.Lens
@@ -169,13 +169,31 @@ defmodule Focus.Lens do
       iex> addressLens = Lens.makeLens(:address)
       iex> streetLens = Lens.makeLens(:street)
       iex> composed = Lens.compose(addressLens, streetLens)
-      iex> Lens.set(composed, "42 Wallaby Way", marge)
+      iex> Lens.set(composed, marge, "42 Wallaby Way")
       %{name: "Marge", address: %{street: "42 Wallaby Way", city: "Springfield"}}
   """
-  @spec set(Lens.t, any, traversable) :: traversable
-  def set(%Lens{setter: setter} = lens, val, structure) do
+  @spec set(Lens.t, traversable, any) :: traversable
+  def set(%Lens{setter: setter} = lens, structure, val) do
     with {:ok, _d} <- Lens.view(lens, structure) do
       setter.(structure).(val)
+    end
+  end
+
+  @doc """
+  Given a list of lenses and a structure, apply Lens.view for each lens
+  to the structure.
+
+  ## Examples
+
+      iex> homer = %{name: "Homer", job: "Nuclear Safety Inspector", children: ["Bart", "Lisa", "Maggie"]}
+      iex> lenses = [Focus.Lens.makeLens(:name), Focus.Lens.makeLens(:children)]
+      iex> Focus.Lens.apply_list(lenses, homer)
+      ["Homer", ["Bart", "Lisa", "Maggie"]]
+  """
+  @spec apply_list(list(Lens.t), traversable) :: [any]
+  def apply_list(lenses, structure) when is_list(lenses) do
+    for lens <- lenses do
+      Lens.view!(lens, structure)
     end
   end
 end
