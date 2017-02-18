@@ -1,6 +1,5 @@
 defmodule Functorial.Lens do
   alias Functorial.Lens
-  import Functorial
 
   @moduledoc """
   Experimenting with functional lenses.
@@ -17,6 +16,16 @@ defmodule Functorial.Lens do
 
   @doc """
   Define a lens to focus on a part of a data structure.
+
+  ## Examples
+
+      iex> alias Functorial.Lens
+      iex> person = %{name: "Homer"}
+      iex> nameLens = Lens.makeLens(:name)
+      iex> nameLens.getter.(person)
+      "Homer"
+      iex> nameLens.setter.(person).("Bart")
+      %{name: "Bart"}
   """
   @spec makeLens(list) :: Lens.t
   def makeLens(path) do
@@ -30,16 +39,16 @@ defmodule Functorial.Lens do
     }
   end
 
-  defp getter(%{__struct__: _} = s, a), do: Map.get(s, a)
-  defp getter(s, a) when is_map(s), do: Access.get(s, a)
-  defp getter(s, a) when is_list(s), do: get_in(s, [Access.at(a)])
-  defp getter(s, a) when is_tuple(s), do: Access.get(s, Access.elem(a))
+  defp getter(%{__struct__: _} = s, x), do: Map.get(s, x)
+  defp getter(s, x) when is_map(s), do: Access.get(s, x)
+  defp getter(s, x) when is_list(s), do: get_in(s, [Access.at(x)])
+  defp getter(s, x) when is_tuple(s), do: elem(s, x)
 
-  defp setter(s, a, f) when is_map(s), do: Map.put(s, a, f)
-  defp setter(s, a, f) when is_list(s), do: List.replace_at(s, a, f)
-  defp setter(s, a, f) when is_tuple(s) do
-    Tuple.delete_at(s, a)
-    Tuple.insert_at(s, a, f)
+  defp setter(s, x, f) when is_map(s), do: Map.put(s, x, f)
+  defp setter(s, x, f) when is_list(s), do: List.replace_at(s, x, f)
+  defp setter(s, x, f) when is_tuple(s) do
+    Tuple.delete_at(s, x)
+    |> Tuple.insert_at(x, f)
   end
 
   @doc """
@@ -55,14 +64,14 @@ defmodule Functorial.Lens do
       iex> Lens.view(composed, marge)
       {:ok, "123 Fake St."}
   """
-  def compose(%Lens{getter: g_a, setter: s_a}, %Lens{getter: g_b, setter: s_b}) do
+  def compose(%Lens{getter: get_x, setter: set_x}, %Lens{getter: get_y, setter: set_y}) do
     %Lens{
       getter: fn s ->
-        g_b.(g_a.(s))
+        get_y.(get_x.(s))
       end,
       setter: fn s ->
         fn f ->
-          s_a.(s).(s_b.(g_a.(s)).(f))
+          set_x.(s).(set_y.(get_x.(s)).(f))
         end
       end
     }
@@ -70,18 +79,51 @@ defmodule Functorial.Lens do
 
   @doc """
   Get a piece of a data structure that a lens focuses on.
+
+  ## Examples
+
+      iex> alias Functorial.Lens
+      iex> marge = %{name: "Marge", address: %{street: "123 Fake St.", city: "Springfield"}}
+      iex> nameLens = Lens.makeLens(:name)
+      iex> Lens.view!(nameLens, marge)
+      "Marge"
+  """
+  @spec view!(Lens.t, traversable) :: any | nil
+  def view!(%Lens{getter: getter}, structure) do
+    getter.(structure)
+  end
+
+  @doc """
+  Get a piece of a data structure that a lens focuses on;
+  returns {:ok, data} | {:error, :bad_lens_path}
+
+  ## Examples
+
+      iex> alias Functorial.Lens
+      iex> marge = %{name: "Marge", address: %{street: "123 Fake St.", city: "Springfield"}}
+      iex> nameLens = Lens.makeLens(:name)
+      iex> Lens.view(nameLens, marge)
+      {:ok, "Marge"}
   """
   @spec view(Lens.t, traversable) :: {:error, :bad_arg} | {:ok, any}
-  def view(%Lens{getter: getter}, structure) do
-    res = getter.(structure)
+  def view(%Lens{} = lens, structure) do
+    res = view!(lens, structure)
     case res do
-      nil -> {:error, :bad_arg}
+      nil -> {:error, :bad_lens_path}
       _   -> {:ok, res}
     end
   end
 
+
   @doc """
-    Modify the part of a data structure that a lens focuses on.
+  Modify the part of a data structure that a lens focuses on.
+
+  ## Examples
+      iex> alias Functorial.Lens
+      iex> marge = %{name: "Marge", address: %{street: "123 Fake St.", city: "Springfield"}}
+      iex> nameLens = Lens.makeLens(:name)
+      iex> Lens.over(nameLens, &String.upcase/1, marge)
+      %{name: "MARGE", address: %{street: "123 Fake St.", city: "Springfield"}}
   """
   @spec over(Lens.t, (any -> any), traversable) :: traversable
   def over(%Lens{setter: setter} = lens, f, structure) do
@@ -92,6 +134,22 @@ defmodule Functorial.Lens do
 
   @doc """
   Update the part of a data structure the lens focuses on.
+
+  ## Examples
+
+      iex> alias Functorial.Lens
+      iex> marge = %{name: "Marge", address: %{street: "123 Fake St.", city: "Springfield"}}
+      iex> nameLens = Lens.makeLens(:name)
+      iex> Lens.set(nameLens, "Homer", marge)
+      %{name: "Homer", address: %{street: "123 Fake St.", city: "Springfield"}}
+
+      iex> alias Functorial.Lens
+      iex> marge = %{name: "Marge", address: %{street: "123 Fake St.", city: "Springfield"}}
+      iex> addressLens = Lens.makeLens(:address)
+      iex> streetLens = Lens.makeLens(:street)
+      iex> composed = Lens.compose(addressLens, streetLens)
+      iex> Lens.set(composed, "42 Wallaby Way", marge)
+      %{name: "Marge", address: %{street: "42 Wallaby Way", city: "Springfield"}}
   """
   @spec set(Lens.t, any, traversable) :: traversable
   def set(%Lens{setter: setter} = lens, val, structure) do
