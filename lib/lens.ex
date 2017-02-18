@@ -178,4 +178,22 @@ defmodule Focus.Lens do
       setter.(structure).(val)
     end
   end
+
+  @doc """
+  Given a list of lenses and a structure, apply Lens.view for each lens
+  to the structure.
+
+  ## Examples
+
+      iex> homer = %{name: "Homer", job: "Nuclear Safety Inspector", children: ["Bart", "Lisa", "Maggie"]}
+      iex> lenses = [Focus.Lens.makeLens(:name), Focus.Lens.makeLens(:children)]
+      iex> Focus.Lens.apply_list(lenses, homer)
+      ["Homer", ["Bart", "Lisa", "Maggie"]]
+  """
+  @spec apply_list(list(Lens.t), traversable) :: [any]
+  def apply_list(lenses, structure) when is_list(lenses) do
+    for lens <- lenses do
+      Lens.view!(lens, structure)
+    end
+  end
 end

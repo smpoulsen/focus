@@ -132,5 +132,4 @@ defmodule Focus.LensTest do
            test_structure.address | locale: %{
              test_structure.address.locale | street: "FAKE ST."}}}
   end
-
 end
