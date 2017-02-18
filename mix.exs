@@ -26,7 +26,7 @@ defmodule Focus.Mixfile do
     [
       {:credo, "~> 0.5.3", only: [:dev, :test]},
       {:dialyxir, "~> 0.4.3", only: [:dev, :test]},
-      {:quixir, "~> 0.9.1"}
+      {:quixir, "~> 0.9.1", only: [:test]}
     ]
   end
 
