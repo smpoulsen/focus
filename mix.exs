@@ -4,7 +4,7 @@ defmodule Functorial.Mixfile do
   def project do
     [app: :functorial,
      version: "0.1.0",
-     elixir: "~> 1.3",
+     elixir: "~> 1.4",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
      deps: deps()]
@@ -27,6 +27,11 @@ defmodule Functorial.Mixfile do
   #
   # Type "mix help deps" for more examples and options
   defp deps do
-    []
+    [
+      {:credo, "~> 0.5.3", only: [:dev, :test]},
+      {:dialyxir, "~> 0.4.3", only: [:dev, :test]},
+      {:excheck, "~> 0.5", only: :test},
+      {:triq, github: "triqng/triq", only: :test},
+    ]
   end
 end
