@@ -5,12 +5,12 @@ defmodule Focus.Lens do
   Experimenting with functional lenses.
   """
 
-  @enforce_keys [:getter, :setter]
-  defstruct [:getter, :setter]
+  @enforce_keys [:get, :put]
+  defstruct [:get, :put]
 
   @type t :: %Lens{
-    getter: ((any) -> any),
-    setter: (((any) -> any) -> any)
+    get: ((any) -> any),
+    put: (((any) -> any) -> any)
   }
 
   @doc """
@@ -21,16 +21,16 @@ defmodule Focus.Lens do
       iex> alias Focus.Lens
       iex> person = %{name: "Homer"}
       iex> name_lens = Lens.make_lens(:name)
-      iex> name_lens.getter.(person)
+      iex> name_lens.get.(person)
       "Homer"
-      iex> name_lens.setter.(person).("Bart")
+      iex> name_lens.put.(person).("Bart")
       %{name: "Bart"}
   """
   @spec make_lens(list) :: Lens.t
   def make_lens(path) do
     %Lens{
-      getter: fn s -> getter(s, path) end,
-      setter: fn s ->
+      get: fn s -> getter(s, path) end,
+      put: fn s ->
         fn f ->
           setter(s, path, f)
         end
@@ -64,12 +64,12 @@ defmodule Focus.Lens do
       iex> Lens.view(composed, marge)
       "123 Fake St."
   """
-  def compose(%Lens{getter: get_x, setter: set_x}, %Lens{getter: get_y, setter: set_y}) do
+  def compose(%Lens{get: get_x, put: set_x}, %Lens{get: get_y, put: set_y}) do
     %Lens{
-      getter: fn s ->
+      get: fn s ->
         get_y.(get_x.(s))
       end,
-      setter: fn s ->
+      put: fn s ->
         fn f ->
           set_x.(s).(set_y.(get_x.(s)).(f))
         end
@@ -110,8 +110,8 @@ defmodule Focus.Lens do
       "Marge"
   """
   @spec view(Lens.t, Focus.traversable) :: any | nil
-  def view(%Lens{getter: getter}, structure) do
-    getter.(structure)
+  def view(%Lens{get: get}, structure) do
+    get.(structure)
   end
 
   @doc """
@@ -149,10 +149,10 @@ defmodule Focus.Lens do
       %{name: "MARGE", address: %{street: "123 Fake St.", city: "Springfield"}}
   """
   @spec over(Lens.t, Focus.traversable, (any -> any)) :: Focus.traversable
-  def over(%Lens{setter: setter} = lens, structure, f) do
+  def over(%Lens{put: setter} = lens, structure, f) do
     data_view = Lens.view(lens, structure)
     case data_view do
-      nil -> {:error, :bad_lens_path}
+      nil -> {:error, {:lens, :bad_path}}
       _   -> setter.(structure).(f.(data_view))
     end
   end
@@ -197,7 +197,7 @@ defmodule Focus.Lens do
       %{name: "Marge", address: %{street: "42 Wallaby Way", city: "Springfield"}}
   """
   @spec set(Lens.t, Focus.traversable, any) :: Focus.traversable
-  def set(%Lens{setter: setter}, structure, val) do
+  def set(%Lens{put: setter}, structure, val) do
     setter.(structure).(val)
   end
 
