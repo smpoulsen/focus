@@ -99,6 +99,39 @@ defmodule Focus.Lens do
   end
 
   @doc """
+  Compose a pair of lenses to operate at the same level as one another.
+  Calling Lens.view/2, Lens.over/3, or Lens.set/3 on an alongside composed
+  pair returns a two-element tuple of the result.
+
+  ## Examples
+
+      iex> alias Focus.Lens
+      iex> nums = [1,2,3,4,5,6]
+      iex> Lens.alongside(Lens.make_lens(0), Lens.make_lens(3))
+      ...> |> Lens.view(nums)
+      {1, 4}
+
+      iex> alias Focus.Lens
+      iex> bart = %{name: "Bart", parents: {"Homer", "Marge"}, age: 10}
+      iex> Lens.alongside(Lens.make_lens(:name), Lens.make_lens(:age))
+      ...> |> Lens.view(bart)
+      {"Bart", 10}
+  """
+  @spec alongside(Lens.t, Lens.t) :: Lens.t
+  def alongside(%Lens{get: get_x, put: set_x}, %Lens{get: get_y, put: set_y}) do
+    %Lens{
+      get: fn s ->
+        {get_x.(s), get_y.(s)}
+      end,
+      put: fn s ->
+        fn f ->
+          {set_x.(s).(f), set_y.(s).(f)}
+        end
+      end
+    }
+  end
+
+  @doc """
   Get a piece of a data structure that a lens focuses on.
 
   ## Examples
