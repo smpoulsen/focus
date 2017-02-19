@@ -103,7 +103,7 @@ Their real utility comes in operating on nested data. Lenses can be created by c
   + =Focus.Lens.over/3=
   + =Focus.Lens.apply_list/2=
 
-*** Lens combinators
+*** Lens composition
   + =Focus.Lens.compose/2, (~>)=
   + =Focus.Lens.alongside/2=
  
