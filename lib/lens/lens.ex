@@ -62,7 +62,7 @@ defmodule Focus.Lens do
       iex> street_lens = Lens.make_lens(:street)
       iex> composed = Lens.compose(address_lens, street_lens)
       iex> Lens.view(composed, marge)
-      "123 Fake St."
+      {:ok, "123 Fake St."}
   """
   def compose(%Lens{get: get_x, put: set_x}, %Lens{get: get_y, put: set_y}) do
     %Lens{
@@ -91,7 +91,7 @@ defmodule Focus.Lens do
       iex> address_lens = Lens.make_lens(:address)
       iex> local_lens = Lens.make_lens(:local)
       iex> street_lens = Lens.make_lens(:street)
-      iex> address_lens ~> local_lens ~> street_lens |> Lens.view(marge)
+      iex> address_lens ~> local_lens ~> street_lens |> Lens.view!(marge)
       "Fake St."
   """
   def x ~> y do
@@ -108,13 +108,13 @@ defmodule Focus.Lens do
       iex> alias Focus.Lens
       iex> nums = [1,2,3,4,5,6]
       iex> Lens.alongside(Lens.make_lens(0), Lens.make_lens(3))
-      ...> |> Lens.view(nums)
+      ...> |> Lens.view!(nums)
       {1, 4}
 
       iex> alias Focus.Lens
       iex> bart = %{name: "Bart", parents: {"Homer", "Marge"}, age: 10}
       iex> Lens.alongside(Lens.make_lens(:name), Lens.make_lens(:age))
-      ...> |> Lens.view(bart)
+      ...> |> Lens.view!(bart)
       {"Bart", 10}
   """
   @spec alongside(Lens.t, Lens.t) :: Lens.t
@@ -139,16 +139,37 @@ defmodule Focus.Lens do
       iex> alias Focus.Lens
       iex> marge = %{name: "Marge", address: %{street: "123 Fake St.", city: "Springfield"}}
       iex> name_lens = Lens.make_lens(:name)
-      iex> Lens.view(name_lens, marge)
+      iex> Lens.view!(name_lens, marge)
       "Marge"
   """
-  @spec view(Lens.t, Focus.traversable) :: any | nil
-  def view(%Lens{get: get}, structure) do
+  @spec view!(Lens.t, Focus.traversable) :: any | nil
+  def view!(%Lens{get: get}, structure) do
     get.(structure)
   end
 
   @doc """
-  Fix Lens.view/2 on a given lens. This partially applies Lens.view/2 with the given
+  Get a piece of a data structure that a lens focuses on;
+  returns {:ok, data} | {:error, :bad_lens_path}
+
+  ## Examples
+
+      iex> alias Focus.Lens
+      iex> marge = %{name: "Marge", address: %{street: "123 Fake St.", city: "Springfield"}}
+      iex> name_lens = Lens.make_lens(:name)
+      iex> Lens.view(name_lens, marge)
+      {:ok, "Marge"}
+  """
+  @spec view(Lens.t, Focus.traversable) :: {:error, :bad_arg} | {:ok, any}
+  def view(%Lens{} = lens, structure) do
+    res = view!(lens, structure)
+    case res do
+      nil -> {:error, :bad_lens_path}
+      _   -> {:ok, res}
+    end
+  end
+
+  @doc """
+  Fix Lens.view!/2 on a given lens. This partially applies Lens.view/2 with the given
   lens and returns a function that takes a Focus.traversable structure.
 
   ## Examples
@@ -166,7 +187,7 @@ defmodule Focus.Lens do
   @spec fix_view(Lens.t) :: (Focus.traversable -> any)
   def fix_view(%Lens{} = lens) do
     fn structure ->
-      Lens.view(lens, structure)
+      Lens.view!(lens, structure)
     end
   end
 
@@ -183,10 +204,8 @@ defmodule Focus.Lens do
   """
   @spec over(Lens.t, Focus.traversable, (any -> any)) :: Focus.traversable
   def over(%Lens{put: setter} = lens, structure, f) do
-    data_view = Lens.view(lens, structure)
-    case data_view do
-      nil -> {:error, {:lens, :bad_path}}
-      _   -> setter.(structure).(f.(data_view))
+    with {:ok, d} <- Lens.view(lens, structure) do
+      setter.(structure).(f.(d))
     end
   end
 
@@ -230,8 +249,10 @@ defmodule Focus.Lens do
       %{name: "Marge", address: %{street: "42 Wallaby Way", city: "Springfield"}}
   """
   @spec set(Lens.t, Focus.traversable, any) :: Focus.traversable
-  def set(%Lens{put: setter}, structure, val) do
-    setter.(structure).(val)
+  def set(%Lens{put: setter} = lens, structure, val) do
+    with {:ok, _d} <- Lens.view(lens, structure) do
+      setter.(structure).(val)
+    end
   end
 
   @doc """
@@ -272,7 +293,7 @@ defmodule Focus.Lens do
   @spec apply_list(list(Lens.t), Focus.traversable) :: [any]
   def apply_list(lenses, structure) when is_list(lenses) do
     for lens <- lenses do
-      Lens.view(lens, structure)
+      Lens.view!(lens, structure)
     end
   end
 end
