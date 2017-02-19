@@ -1,6 +1,6 @@
 defmodule Focus do
   @moduledoc """
-  Shared elements for the Lens and Prism modules.
+  Shared elements for the Focus modules.
   """
   @type product     :: map | struct | tuple
   @type sum         :: list
