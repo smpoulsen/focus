@@ -25,21 +25,21 @@ defmodule Focus.LensTest do
     {:ok, test_structure: test_structure}
   end
 
-  test "lens law - get a value that is set" do
+  test "Lens law: Put/Get - get a value that is set" do
     ptest structure: map(like: %{name: string()}), new_name: string() do
       lens = Lens.make_lens(:name)
       assert Lens.view(lens, Lens.set(lens, structure, new_name)) == new_name
     end
   end
 
-  test "lens law - setting a value that is retrieved is doing nothing" do
+  test "Lens law: Get/Put - setting a value that is retrieved is doing nothing" do
     ptest structure: map(like: %{name: string()}) do
       lens = Lens.make_lens(:name)
       assert Lens.set(lens, structure, Lens.view(lens, structure)) == structure
     end
   end
 
-  test "lens law - last set value wins" do
+  test "Lens law: Put/Put - last set value wins" do
     ptest structure: map(like: %{name: string()}), name1: string(), name2: string() do
       lens = Lens.make_lens(:name)
       assert Lens.view(lens, Lens.set(lens, Lens.set(lens, structure, name1), name2)) == name2
@@ -107,5 +107,25 @@ defmodule Focus.LensTest do
       %{test_structure | address: %{
            test_structure.address | locale: %{
              test_structure.address.locale | street: "FAKE ST."}}}
+  end
+
+  test "get data from a list", %{test_structure: test_structure} do
+    list_lens = Lens.make_lens(:list)
+    second_elem = Lens.make_lens(1)
+    assert (list_lens ~> second_elem |> Lens.view(test_structure)) == 4
+  end
+
+  test "set data in a list", %{test_structure: test_structure} do
+    list_lens = Lens.make_lens(:list)
+    second_elem = Lens.make_lens(1)
+    assert (list_lens ~> second_elem |> Lens.set(test_structure, "Banana")) ==
+      %{test_structure | list: [2, "Banana", 8, 16, 32]}
+  end
+
+  test "manipulate data in a list", %{test_structure: test_structure} do
+    list_lens = Lens.make_lens(:list)
+    second_elem = Lens.make_lens(1)
+    assert (list_lens ~> second_elem |> Lens.over(test_structure, fn x -> x * x * x end)) ==
+      %{test_structure | list: [2, 64, 8, 16, 32]}
   end
 end
