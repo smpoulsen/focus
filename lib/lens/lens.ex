@@ -62,7 +62,7 @@ defmodule Focus.Lens do
       iex> street_lens = Lens.make_lens(:street)
       iex> composed = Lens.compose(address_lens, street_lens)
       iex> Lens.view(composed, marge)
-      {:ok, "123 Fake St."}
+      "123 Fake St."
   """
   def compose(%Lens{getter: get_x, setter: set_x}, %Lens{getter: get_y, setter: set_y}) do
     %Lens{
@@ -91,7 +91,7 @@ defmodule Focus.Lens do
       iex> address_lens = Lens.make_lens(:address)
       iex> local_lens = Lens.make_lens(:local)
       iex> street_lens = Lens.make_lens(:street)
-      iex> address_lens ~> local_lens ~> street_lens |> Lens.view!(marge)
+      iex> address_lens ~> local_lens ~> street_lens |> Lens.view(marge)
       "Fake St."
   """
   def x ~> y do
@@ -106,37 +106,16 @@ defmodule Focus.Lens do
       iex> alias Focus.Lens
       iex> marge = %{name: "Marge", address: %{street: "123 Fake St.", city: "Springfield"}}
       iex> name_lens = Lens.make_lens(:name)
-      iex> Lens.view!(name_lens, marge)
+      iex> Lens.view(name_lens, marge)
       "Marge"
   """
-  @spec view!(Lens.t, Focus.traversable) :: any | nil
-  def view!(%Lens{getter: getter}, structure) do
+  @spec view(Lens.t, Focus.traversable) :: any | nil
+  def view(%Lens{getter: getter}, structure) do
     getter.(structure)
   end
 
   @doc """
-  Get a piece of a data structure that a lens focuses on;
-  returns {:ok, data} | {:error, :bad_lens_path}
-
-  ## Examples
-
-      iex> alias Focus.Lens
-      iex> marge = %{name: "Marge", address: %{street: "123 Fake St.", city: "Springfield"}}
-      iex> name_lens = Lens.make_lens(:name)
-      iex> Lens.view(name_lens, marge)
-      {:ok, "Marge"}
-  """
-  @spec view(Lens.t, Focus.traversable) :: {:error, :bad_arg} | {:ok, any}
-  def view(%Lens{} = lens, structure) do
-    res = view!(lens, structure)
-    case res do
-      nil -> {:error, :bad_lens_path}
-      _   -> {:ok, res}
-    end
-  end
-
-  @doc """
-  Fix Lens.view!/2 on a given lens. This partially applies Lens.view/2 with the given
+  Fix Lens.view/2 on a given lens. This partially applies Lens.view/2 with the given
   lens and returns a function that takes a Focus.traversable structure.
 
   ## Examples
@@ -154,7 +133,7 @@ defmodule Focus.Lens do
   @spec fix_view(Lens.t) :: (Focus.traversable -> any)
   def fix_view(%Lens{} = lens) do
     fn structure ->
-      Lens.view!(lens, structure)
+      Lens.view(lens, structure)
     end
   end
 
@@ -171,8 +150,10 @@ defmodule Focus.Lens do
   """
   @spec over(Lens.t, Focus.traversable, (any -> any)) :: Focus.traversable
   def over(%Lens{setter: setter} = lens, structure, f) do
-    with {:ok, d} <- Lens.view(lens, structure) do
-      setter.(structure).(f.(d))
+    data_view = Lens.view(lens, structure)
+    case data_view do
+      nil -> {:error, :bad_lens_path}
+      _   -> setter.(structure).(f.(data_view))
     end
   end
 
@@ -216,10 +197,8 @@ defmodule Focus.Lens do
       %{name: "Marge", address: %{street: "42 Wallaby Way", city: "Springfield"}}
   """
   @spec set(Lens.t, Focus.traversable, any) :: Focus.traversable
-  def set(%Lens{setter: setter} = lens, structure, val) do
-    with {:ok, _d} <- Lens.view(lens, structure) do
-      setter.(structure).(val)
-    end
+  def set(%Lens{setter: setter}, structure, val) do
+    setter.(structure).(val)
   end
 
   @doc """
@@ -260,7 +239,7 @@ defmodule Focus.Lens do
   @spec apply_list(list(Lens.t), Focus.traversable) :: [any]
   def apply_list(lenses, structure) when is_list(lenses) do
     for lens <- lenses do
-      Lens.view!(lens, structure)
+      Lens.view(lens, structure)
     end
   end
 end
