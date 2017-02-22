@@ -1,4 +1,4 @@
 defmodule FocusTest do
   use ExUnit.Case
-  doctest Focus.Lens
+  doctest Focusable.Lens
 end

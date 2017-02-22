@@ -6,5 +6,5 @@ defmodule Focus.Types do
   @type sum         :: list
   @type traversable :: product | sum
   @type maybe       :: {:ok, any} | {:error, any}
-  @type optic       :: Focus.Lens.t
+  @type optic       :: Lens.t
 end

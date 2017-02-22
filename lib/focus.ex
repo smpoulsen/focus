@@ -1,4 +1,4 @@
-defprotocol Focus do
+defprotocol Focusable do
   @doc "View the data that an optic focuses on."
   def view(optic, structure)
 
@@ -13,4 +13,22 @@ defprotocol Focus do
 
   @doc "Infix of Focus.compose/2"
   def (optic) ~> (optic)
+end
+
+defmodule Focus do
+  alias Focus.Types
+
+  @spec view(Types.optic, Types.traversable) :: any | nil
+  def view(optic, structure) do
+    Focusable.view(optic, structure)
+  end
+
+  @spec over(Types.optic, Types.traversable, ((any) -> any)) :: Types.traversable
+  def over(optic, structure, f) do
+    Focusable.over(optic, structure, f)
+  end
+
+  def set(optic, structure, v) do
+    Focusable.set(optic, structure, v)
+  end
 end

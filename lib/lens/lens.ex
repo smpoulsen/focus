@@ -14,7 +14,7 @@ defmodule Lens do
   }
 
   @doc """
-  Define a lens to focus on a part of a data structure.
+  Define a lens to Focus on a part of a data structure.
 
   ## Examples
 
@@ -89,7 +89,7 @@ defmodule Lens do
   end
 
   @doc """
-  Get a piece of a data structure that a lens focuses on;
+  Get a piece of a data structure that a lens Focuses on;
   returns {:ok, data} | {:error, :bad_lens_path}
 
   ## Examples
@@ -129,6 +129,7 @@ defmodule Lens do
       Focus.view(lens, structure)
     end
   end
+
   @doc """
   Compose a pair of lenses to operate at the same level as one another.
   Calling Focus.view/2, Focus.over/3, or Focus.set/3 on an alongside composed
@@ -182,9 +183,9 @@ defmodule Lens do
     end
   end
 
-  defimpl Focus do
+  defimpl Focusable do
     @doc """
-    View the data that an optic focuses on.
+    View the data that an optic Focuses on.
 
     ## Examples
 
@@ -205,7 +206,7 @@ defmodule Lens do
     end
 
     @doc """
-    Modify the part of a data structure that a lens focuses on.
+    Modify the part of a data structure that a lens Focuses on.
 
     ## Examples
 
@@ -222,7 +223,7 @@ defmodule Lens do
     end
 
     @doc """
-    Update the part of a data structure the lens focuses on.
+    Update the part of a data structure the lens Focuses on.
 
     ## Examples
 
@@ -234,7 +235,7 @@ defmodule Lens do
         iex> marge = %{name: "Marge", address: %{street: "123 Fake St.", city: "Springfield"}}
         iex> address_lens = Lens.make_lens(:address)
         iex> street_lens = Lens.make_lens(:street)
-        iex> composed = Focus.compose(address_lens, street_lens)
+        iex> composed = Focusable.compose(address_lens, street_lens)
         iex> Focus.set(composed, marge, "42 Wallaby Way")
         %{name: "Marge", address: %{street: "42 Wallaby Way", city: "Springfield"}}
     """
@@ -259,7 +260,7 @@ defmodule Lens do
         ...> }
         iex> address_lens = Lens.make_lens(:address)
         iex> street_lens = Lens.make_lens(:street)
-        iex> composed = Focus.compose(address_lens, street_lens)
+        iex> composed = Focusable.compose(address_lens, street_lens)
         iex> Focus.view(composed, marge)
         "123 Fake St."
     """
@@ -281,7 +282,7 @@ defmodule Lens do
 
     ## Examples
 
-    iex> import Focus
+    iex> import Focusable
     iex> marge = %{name: "Marge", address: %{
     ...>   local: %{number: 123, street: "Fake St."},
     ...>   city: "Springfield"}
@@ -293,7 +294,7 @@ defmodule Lens do
     "Fake St."
     """
     def x ~> y do
-      Focus.compose(x, y)
+      compose(x, y)
     end
 
   end
