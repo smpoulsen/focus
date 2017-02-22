@@ -40,8 +40,23 @@ defmodule Prism do
     }
   end
 
-  defp getter(s, x) when is_list(s), do: get_in(s, [Access.at(x)])
-  defp setter(s, x, f) when is_list(s), do: List.replace_at(s, x, f)
+  defp getter(s, x) when is_list(s) do
+    if Keyword.keyword?(s) do
+      Keyword.get(s, x)
+    else
+      get_in(s, [Access.at(x)])
+    end
+  end
+  defp getter(_s, _x), do: {:error, {:prism, :bad_data_structure}}
+
+  defp setter(s, x, f) when is_list(s) do
+    if Keyword.keyword?(s) do
+      Keyword.put(s, x, f)
+    else
+      List.replace_at(s, x, f)
+    end
+  end
+  defp setter(_s, _x, _f), do: {:error, {:prism, :bad_data_structure}}
 
   @doc """
   A prism that focuses on an index in a list.

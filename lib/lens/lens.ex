@@ -40,6 +40,7 @@ defmodule Lens do
   defp getter(%{__struct__: _} = s, x), do: Map.get(s, x)
   defp getter(s, x) when is_map(s), do: Access.get(s, x)
   defp getter(s, x) when is_tuple(s), do: elem(s, x)
+  defp getter(_, _), do: {:error, {:lens, :bad_data_structure}}
 
   defp setter(s, x, f) when is_map(s), do: Map.put(s, x, f)
   defp setter(s, x, f) when is_tuple(s) do
@@ -47,6 +48,7 @@ defmodule Lens do
     |> Tuple.delete_at(x)
     |> Tuple.insert_at(x, f)
   end
+  defp setter(_s, _x, _f), do: {:error, {:lens, :bad_data_structure}}
 
   @doc """
   Partially apply a lens to Focus.over/3, returning a function that takes a
