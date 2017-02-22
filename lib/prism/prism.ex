@@ -44,6 +44,64 @@ defmodule Prism do
   defp setter(s, x, f) when is_list(s), do: List.replace_at(s, x, f)
 
   @doc """
+  A prism that matches an {:ok, _} tuple.
+
+  ## Examples
+
+      iex> ok = Prism.ok
+      iex> ok |> Focus.view({:ok, 5})
+      {:ok, 5}
+      iex> ok |> Focus.set({:ok, 5}, "Banana")
+      {:ok, "Banana"}
+      iex> ok |> Focus.view({:error, :oops})
+      {:error, {:prism, :bad_path}}
+  """
+  @spec ok() :: Prism.t
+  def ok() do
+    %Prism{
+      get: fn s -> get_ok(s) end,
+      put: fn s ->
+        fn f ->
+          set_ok(s, f)
+        end
+      end
+    }
+  end
+  defp get_ok({:ok, x}), do: x
+  defp get_ok({:error, _}), do: nil
+  defp set_ok({:ok, _x}, f), do: {:ok, f}
+
+  @doc """
+  A prism that matches an {:error, _} tuple.
+  Note that on a successful match, view/set/over will
+  return {:ok, _}
+
+  ## Examples
+
+  iex> error = Prism.error
+  iex> error |> Focus.view({:error, 5})
+  {:ok, 5}
+  iex> error |> Focus.set({:error, 5}, "Banana")
+  {:ok, "Banana"}
+  iex> error |> Focus.view({:ok, :oops})
+  {:error, {:prism, :bad_path}}
+  """
+  @spec error() :: Prism.t
+  def error() do
+    %Prism{
+      get: fn s -> get_error(s) end,
+      put: fn s ->
+        fn f ->
+          set_error(s, f)
+        end
+      end
+    }
+  end
+  defp get_error({:error, x}), do: x
+  defp get_error({:ok, _}), do: nil
+  defp set_error({:error, _x}, f), do: {:ok, f}
+
+  @doc """
   Partially apply a prism to Focus.over/3, returning a function that takes a
   Types.traversable and an update function.
 
