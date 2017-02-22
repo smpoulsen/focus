@@ -101,7 +101,7 @@ defmodule Lens do
   def safe_view(%Lens{} = lens, structure) do
     res = Focus.view(lens, structure)
     case res do
-      nil -> {:error, :bad_lens_path}
+      nil -> {:error, {:lens, :bad_path}}
       _   -> {:ok, res}
     end
   end

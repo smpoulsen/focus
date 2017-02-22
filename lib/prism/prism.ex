@@ -44,6 +44,22 @@ defmodule Prism do
   defp setter(s, x, f) when is_list(s), do: List.replace_at(s, x, f)
 
   @doc """
+  A prism that focuses on an index in a list.
+
+  ## Examples
+
+      iex> first_elem = Prism.idx(0)
+      iex> first_elem |> Focus.view([1,2,3,4,5])
+      {:ok, 1}
+
+      iex> bad_index = Prism.idx(10)
+      iex> bad_index |> Focus.view([1,2,3])
+      {:error, {:prism, :bad_path}}
+  """
+  @spec idx(number) :: Prism.t
+  def idx(num) when is_number(num), do: make_prism(num)
+
+  @doc """
   A prism that matches an {:ok, _} tuple.
 
   ## Examples
