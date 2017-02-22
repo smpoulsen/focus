@@ -1,8 +1,9 @@
 defmodule Focus.LensTest do
   use ExUnit.Case
   use Quixir
-  import Focusable
+  import Focus
   doctest Lens
+  doctest Focusable.Lens
 
   setup do
     test_structure = %{

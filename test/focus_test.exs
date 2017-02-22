@@ -1,4 +1,5 @@
 defmodule FocusTest do
   use ExUnit.Case
-  doctest Focusable.Lens
+  import Focus
+  doctest Focus
 end
