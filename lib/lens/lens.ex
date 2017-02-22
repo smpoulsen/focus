@@ -39,11 +39,9 @@ defmodule Lens do
 
   defp getter(%{__struct__: _} = s, x), do: Map.get(s, x)
   defp getter(s, x) when is_map(s), do: Access.get(s, x)
-  defp getter(s, x) when is_list(s), do: get_in(s, [Access.at(x)])
   defp getter(s, x) when is_tuple(s), do: elem(s, x)
 
   defp setter(s, x, f) when is_map(s), do: Map.put(s, x, f)
-  defp setter(s, x, f) when is_list(s), do: List.replace_at(s, x, f)
   defp setter(s, x, f) when is_tuple(s) do
     s
     |> Tuple.delete_at(x)
@@ -126,59 +124,6 @@ defmodule Lens do
   @spec fix_view(Lens.t) :: (Types.traversable -> any)
   def fix_view(%Lens{} = lens) do
     fn structure ->
-      Focus.view(lens, structure)
-    end
-  end
-
-  @doc """
-  Compose a pair of lenses to operate at the same level as one another.
-  Calling Focus.view/2, Focus.over/3, or Focus.set/3 on an alongside composed
-  pair returns a two-element tuple of the result.
-
-  ## Examples
-
-  iex> nums = [1,2,3,4,5,6]
-  iex> Lens.alongside(Lens.make_lens(0), Lens.make_lens(3))
-  ...> |> Focus.view(nums)
-  {1, 4}
-
-  iex> bart = %{name: "Bart", parents: {"Homer", "Marge"}, age: 10}
-  iex> Lens.alongside(Lens.make_lens(:name), Lens.make_lens(:age))
-  ...> |> Focus.view(bart)
-  {"Bart", 10}
-  """
-  @spec alongside(Lens.t, Lens.t) :: Lens.t
-  def alongside(%Lens{get: get_x, put: set_x}, %Lens{get: get_y, put: set_y}) do
-    %Lens{
-      get: fn s ->
-      {get_x.(s), get_y.(s)}
-    end,
-      put: fn s ->
-        fn f ->
-          {set_x.(s).(f), set_y.(s).(f)}
-        end
-      end
-    }
-  end
-
-  @doc """
-  Given a list of lenses and a structure, apply Focus.view for each lens
-  to the structure.
-
-  ## Examples
-
-      iex> homer = %{
-      ...>   name: "Homer",
-      ...>   job: "Nuclear Safety Inspector",
-      ...>   children: ["Bart", "Lisa", "Maggie"]
-      ...> }
-      iex> lenses = [Lens.make_lens(:name), Lens.make_lens(:children)]
-      iex> Lens.apply_list(lenses, homer)
-      ["Homer", ["Bart", "Lisa", "Maggie"]]
-  """
-  @spec apply_list(list(Lens.t), Types.traversable) :: [any]
-  def apply_list(lenses, structure) when is_list(lenses) do
-    for lens <- lenses do
       Focus.view(lens, structure)
     end
   end

@@ -44,7 +44,8 @@ defmodule Focus do
       iex> Focus.view(composed, marge)
       "123 Fake St."
   """
-  def compose(%Lens{get: get_x, put: set_x}, %Lens{get: get_y, put: set_y}) do
+  @spec compose(Types.optic, Types.optic) :: Types.optic
+  def compose(%{get: get_x, put: set_x}, %{get: get_y, put: set_y}) do
     %Lens{
       get: fn s ->
       get_y.(get_x.(s))
@@ -73,7 +74,63 @@ defmodule Focus do
       iex> address_lens ~> local_lens ~> street_lens |> Focus.view(marge)
       "Fake St."
   """
+  @spec (Types.optic) ~> (Types.optic) :: Types.optic
   def x ~> y do
     compose(x, y)
   end
+
+  @doc """
+  Compose a pair of lenses to operate at the same level as one another.
+  Calling Focus.view/2, Focus.over/3, or Focus.set/3 on an alongside composed
+  pair returns a two-element tuple of the result.
+
+  ## Examples
+
+      iex> nums = [1,2,3,4,5,6]
+      iex> Focus.alongside(Prism.make_prism(0), Prism.make_prism(3))
+      ...> |> Focus.view(nums)
+      {1, 4}
+
+      iex> bart = %{name: "Bart", parents: {"Homer", "Marge"}, age: 10}
+      iex> Focus.alongside(Lens.make_lens(:name), Lens.make_lens(:age))
+      ...> |> Focus.view(bart)
+      {"Bart", 10}
+  """
+  @spec alongside(Types.optic, Types.optic) :: Types.optic
+  def alongside(%{get: get_x, put: set_x}, %{get: get_y, put: set_y}) do
+    %Lens{
+      get: fn s ->
+      {get_x.(s), get_y.(s)}
+    end,
+      put: fn s ->
+        fn f ->
+          {set_x.(s).(f), set_y.(s).(f)}
+        end
+      end
+    }
+  end
+
+  @doc """
+  Given a list of lenses and a structure, apply Focus.view for each lens
+  to the structure.
+
+  ## Examples
+
+      iex> homer = %{
+      ...>   name: "Homer",
+      ...>   job: "Nuclear Safety Inspector",
+      ...>   children: ["Bart", "Lisa", "Maggie"]
+      ...> }
+      iex> lenses = [Lens.make_lens(:name), Lens.make_lens(:children)]
+      iex> Focus.apply_list(lenses, homer)
+      ["Homer", ["Bart", "Lisa", "Maggie"]]
+  """
+  @spec apply_list(list(Types.optic), Types.traversable) :: [any]
+  def apply_list(lenses, structure) when is_list(lenses) do
+    for lens <- lenses do
+      Focus.view(lens, structure)
+    end
+  end
+
+
 end
