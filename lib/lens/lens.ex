@@ -51,16 +51,39 @@ defmodule Lens do
   defp setter(_s, _x, _f), do: {:error, {:lens, :bad_data_structure}}
 
   @doc """
+  Automatically generate the valid lenses for the supplied map-like data structure.
+
+  ## Examples
+
+     iex> lisa = %{name: "Lisa", pets: %{cat: "Snowball"}}
+     iex> lisa_lenses = Lens.make_lenses(lisa)
+     iex> lisa_lenses.name
+     ...> |> Focus.view(lisa)
+     "Lisa"
+     iex> pet_lenses = Lens.make_lenses(lisa.pets)
+     iex> lisa_lenses.pets
+     ...> ~> pet_lenses.cat
+     ...> |> Focus.set(lisa, "Snowball II")
+     %{name: "Lisa", pets: %{cat: "Snowball II"}}
+  """
+  @spec make_lenses(Types.traversable) :: %{optional(atom) => Lens.t, optional(String.t) => Lens.t}
+  def make_lenses(%{} = structure) do
+    for key <- Map.keys(structure), into: %{} do
+      {key, Lens.make_lens(key)}
+    end
+  end
+
+  @doc """
   Partially apply a lens to Focus.over/3, returning a function that takes a
   Types.traversable and an update function.
 
   ## Examples
 
-  iex> upcase_name = Lens.make_lens(:name)
-  ...> |> Lens.fix_over(&String.upcase/1)
-  iex> %{name: "Bart", parents: {"Homer", "Marge"}}
-  ...> |> upcase_name.()
-  %{name: "BART", parents: {"Homer", "Marge"}}
+      iex> upcase_name = Lens.make_lens(:name)
+      ...> |> Lens.fix_over(&String.upcase/1)
+      iex> %{name: "Bart", parents: {"Homer", "Marge"}}
+      ...> |> upcase_name.()
+      %{name: "BART", parents: {"Homer", "Marge"}}
   """
   @spec fix_over(Lens.t, ((any) -> any)) :: ((Types.traversable) -> Types.traversable)
   def fix_over(%Lens{} = lens, f \\ fn x -> x end) when is_function(f) do

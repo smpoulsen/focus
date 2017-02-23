@@ -147,7 +147,7 @@ defmodule Focus do
       iex> name |> Focus.has(%{name: "Homer"})
       true
   """
-  @spec has(Types.optic, Types.traversable) :: bool
+  @spec has(Types.optic, Types.traversable) :: boolean
   def has(optic, structure) do
     case Focus.view(optic, structure) do
       nil -> false
@@ -169,6 +169,6 @@ defmodule Focus do
   iex> name |> Focus.hasnt(%{name: "Homer"})
   false
   """
-  @spec hasnt(Types.optic, Types.traversable) :: bool
+  @spec hasnt(Types.optic, Types.traversable) :: boolean
   def hasnt(optic, structure), do: !has(optic, structure)
 end
