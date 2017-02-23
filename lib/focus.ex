@@ -12,6 +12,8 @@ end
 defmodule Focus do
   alias Focus.Types
 
+  @moduledoc "Common functions usable by lenses, prisms, and traversals."
+
   @spec view(Types.optic, Types.traversable) :: any | nil
   def view(optic, structure) do
     Focusable.view(optic, structure)
@@ -132,5 +134,41 @@ defmodule Focus do
     end
   end
 
+  @doc """
+  Check whether an optic target is present in a data structure.
 
+  ## Examples
+
+      iex> first_elem = Prism.idx(1)
+      iex> first_elem |> Focus.has([0])
+      false
+
+      iex> name = Lens.make_lens(:name)
+      iex> name |> Focus.has(%{name: "Homer"})
+      true
+  """
+  @spec has(Types.optic, Types.traversable) :: bool
+  def has(optic, structure) do
+    case Focus.view(optic, structure) do
+      nil -> false
+      {:error, _} -> false
+      _   -> true
+    end
+  end
+
+  @doc """
+  Check whether an optic target is not present in a data structure.
+
+  ## Examples
+
+  iex> first_elem = Prism.idx(1)
+  iex> first_elem |> Focus.hasnt([0])
+  true
+
+  iex> name = Lens.make_lens(:name)
+  iex> name |> Focus.hasnt(%{name: "Homer"})
+  false
+  """
+  @spec hasnt(Types.optic, Types.traversable) :: bool
+  def hasnt(optic, structure), do: !has(optic, structure)
 end
