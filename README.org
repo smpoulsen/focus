@@ -18,13 +18,13 @@ To construct a lens:
 
 #+BEGIN_SRC elixir
   # A lens for the key :name
-  Focus.Lens.make_lens(:name)
+  Lens.make_lens(:name)
 
   # A lens for the key "name"
-  Focus.Lens.make_lens("name")
+  Lens.make_lens("name")
 
   # A lens for the second item in a tuple:
-  Focus.Lens.make_lens(1)
+  Lens.make_lens(1)
 #+END_SRC
 
 Each lens provides both a getter and a setter for the accessor it was created for.
@@ -35,15 +35,15 @@ Lenses can be used to access and/or modify structured data:
   # Extract a value from a simple map:
 
   person = %{name: "Homer"}
-  nameLens = Focus.Lens.make_lens(:name)
+  nameLens = Lens.make_lens(:name)
 
-  Focus.Lens.view(nameLens, person) == "Homer"
-  # true
+  Lens.view(nameLens, person) 
+  # "Homer"
 
-  Focus.Lens.set(nameLens, person, "Bart")
+  Lens.set(nameLens, person, "Bart")
   # %{name: "Bart"}
 
-  Focus.Lens.over(nameLens, person, &String.upcase/1)
+  Lens.over(nameLens, person, &String.upcase/1)
   # %{name: "HOMER"}
 #+END_SRC
 
@@ -63,22 +63,22 @@ Their real utility comes in operating on nested data. Lenses can be created by c
   }
 
   # To access the street, we can compose the lenses that lead there from the top level.
-  # Lenses can be composed with Focus.Lens.compose/2, or the infix (~>) operator.
+  # Lenses can be composed with Focus.compose/2, or the infix (~>) operator.
 
-  address = Focus.Lens.make_lens(:address)
-  locale =  Focus.Lens.make_lens(:locale)
-  street =  Focus.Lens.make_lens(:street)
+  address = Lens.make_lens(:address)
+  locale =  Lens.make_lens(:locale)
+  street =  Lens.make_lens(:street)
 
   address
   ~> locale
   ~> street
-  |> Focus.Lens.view!(person)
+  |> Focus.view(person)
   # "Evergreen Terrace"
 
   address
   ~> locale
   ~> street
-  |> Focus.Lens.set(person, "Fake Street")
+  |> Focus.set(person, "Fake Street")
   # person = %{
   #   name: "Homer",
   #   address: %{
@@ -102,7 +102,7 @@ Their real utility comes in operating on nested data. Lenses can be created by c
   + =Prism.ok/0=
   + =Prism.error/0=
 
-*** Lens application
+*** Optic application
   + =Focus.view/2=
   + =Focus.over/3=
   + =Focus.set/3=
@@ -113,7 +113,7 @@ Their real utility comes in operating on nested data. Lenses can be created by c
   + =Focus.fix_over/3=
   + =Focus.fix_set/3=
 
-*** Lens composition
+*** Optic composition
   + =Focus.compose/2, (~>)=
   + =Focus.alongside/2=
  
