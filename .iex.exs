@@ -1,2 +1,3 @@
-import Focus.Lens
-alias Focus.Lens
+import Focus
+alias Lens
+alias Prism

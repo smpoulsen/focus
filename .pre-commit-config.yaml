@@ -1,0 +1,17 @@
+-   repo: local
+    hooks:
+    -   id: mix-test
+        name: 'elixir: mix test'
+        entry: mix test
+        language: system
+        files: \.exs$
+    -   id: mix-dialyzer
+        name: 'elixir: mix dialyzer'
+        entry: mix dialyzer
+        language: system
+        files: \.ex$
+    -   id: mix-credo
+        name: 'elixir: mix credo'
+        entry: mix credo
+        language: system
+        files: \.ex$
