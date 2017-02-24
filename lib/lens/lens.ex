@@ -3,6 +3,9 @@ defmodule Lens do
 
   @moduledoc """
   Lenses combine getters and setters for keys in data structures.
+
+  Lenses should match/operate over a single value in a data structure,
+  e.g. a key in a map/struct.
   """
 
   @enforce_keys [:get, :put]
@@ -20,9 +23,9 @@ defmodule Lens do
 
       iex> person = %{name: "Homer"}
       iex> name_lens = Lens.make_lens(:name)
-      iex> name_lens.get.(person)
+      iex> name_lens |> Focus.view(person)
       "Homer"
-      iex> name_lens.put.(person).("Bart")
+      iex> name_lens |> Focus.set(person, "Bart")
       %{name: "Bart"}
   """
   @spec make_lens(list) :: Lens.t
@@ -70,86 +73,6 @@ defmodule Lens do
   def make_lenses(%{} = structure) do
     for key <- Map.keys(structure), into: %{} do
       {key, Lens.make_lens(key)}
-    end
-  end
-
-  @doc """
-  Partially apply a lens to Focus.over/3, returning a function that takes a
-  Types.traversable and an update function.
-
-  ## Examples
-
-      iex> upcase_name = Lens.make_lens(:name)
-      ...> |> Lens.fix_over(&String.upcase/1)
-      iex> %{name: "Bart", parents: {"Homer", "Marge"}}
-      ...> |> upcase_name.()
-      %{name: "BART", parents: {"Homer", "Marge"}}
-  """
-  @spec fix_over(Lens.t, ((any) -> any)) :: ((Types.traversable) -> Types.traversable)
-  def fix_over(%Lens{} = lens, f \\ fn x -> x end) when is_function(f) do
-    fn structure ->
-      Focus.over(lens, structure, f)
-    end
-  end
-
-  @doc """
-  Partially apply a lens to Focus.set/3, returning a function that takes a
-  Types.traversable and a new value.
-
-  ## Examples
-
-      iex> name_setter = Lens.make_lens(:name)
-      ...> |> Lens.fix_set
-      iex> %{name: "Bart", parents: {"Homer", "Marge"}}
-      ...> |> name_setter.("Lisa")
-      %{name: "Lisa", parents: {"Homer", "Marge"}}
-  """
-  @spec fix_set(Lens.t) :: ((Types.traversable, any) -> Types.traversable)
-  def fix_set(%Lens{} = lens) do
-    fn structure, val ->
-      Focus.set(lens, structure, val)
-    end
-  end
-
-  @doc """
-  Get a piece of a data structure that a lens Focuses on;
-  returns {:ok, data} | {:error, :bad_lens_path}
-
-  ## Examples
-
-      iex> marge = %{name: "Marge", address: %{street: "123 Fake St.", city: "Springfield"}}
-      iex> name_lens = Lens.make_lens(:name)
-      iex> Lens.safe_view(name_lens, marge)
-      {:ok, "Marge"}
-  """
-  @spec safe_view(Lens.t, Types.traversable) :: {:error, :bad_arg} | {:ok, any}
-  def safe_view(%Lens{} = lens, structure) do
-    res = Focus.view(lens, structure)
-    case res do
-      nil -> {:error, {:lens, :bad_path}}
-      _   -> {:ok, res}
-    end
-  end
-
-  @doc """
-  Fix Focus.view/2 on a given lens. This partially applies Focus.view/2 with the given
-  lens and returns a function that takes a Types.traversable structure.
-
-  ## Examples
-
-      iex> view_name = Lens.make_lens(:name)
-      ...> |> Lens.fix_view
-      iex> homer = %{name: "Homer"}
-      iex> view_name.(homer)
-      "Homer"
-      iex> [homer, %{name: "Marge"}, %{name: "Bart"}]
-      ...> |> Enum.map(&view_name.(&1))
-      ["Homer", "Marge", "Bart"]
-  """
-  @spec fix_view(Lens.t) :: (Types.traversable -> any)
-  def fix_view(%Lens{} = lens) do
-    fn structure ->
-      Focus.view(lens, structure)
     end
   end
 
@@ -214,6 +137,26 @@ defmodule Lens do
       with {:ok, _d} <- Lens.safe_view(lens, structure) do
         setter.(structure).(val)
       end
+    end
+  end
+
+  @doc """
+  Get a piece of a data structure that a lens Focuses on;
+  returns {:ok, data} | {:error, :bad_lens_path}
+
+  ## Examples
+
+      iex> marge = %{name: "Marge", address: %{street: "123 Fake St.", city: "Springfield"}}
+      iex> name_lens = Lens.make_lens(:name)
+      iex> Lens.safe_view(name_lens, marge)
+      {:ok, "Marge"}
+  """
+  @spec safe_view(Lens.t, Types.traversable) :: {:error, :bad_arg} | {:ok, any}
+  def safe_view(%Lens{} = lens, structure) do
+    res = Focus.view(lens, structure)
+    case res do
+      nil -> {:error, {:lens, :bad_path}}
+      _   -> {:ok, res}
     end
   end
 end

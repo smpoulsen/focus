@@ -23,7 +23,7 @@ To construct a lens:
   # A lens for the key "name"
   Focus.Lens.make_lens("name")
 
-  # A lens for the second item in a list/tuple:
+  # A lens for the second item in a tuple:
   Focus.Lens.make_lens(1)
 #+END_SRC
 
@@ -37,7 +37,7 @@ Lenses can be used to access and/or modify structured data:
   person = %{name: "Homer"}
   nameLens = Focus.Lens.make_lens(:name)
 
-  Focus.Lens.view!(nameLens, person) == "Homer"
+  Focus.Lens.view(nameLens, person) == "Homer"
   # true
 
   Focus.Lens.set(nameLens, person, "Bart")
@@ -93,19 +93,29 @@ Their real utility comes in operating on nested data. Lenses can be created by c
 #+END_SRC
 
 ** Functions 
-*** Lens creation
-  + =Focus.Lens.make_lens/1=
+*** Optic creation
+  + =Lens.make_lens/1=
+  + =Lens.make_lenses/1=
+  + =Prism.make_prism/1=
+  + =Prism.idx/1=
+*** Pre-made optics
+  + =Prism.ok/0=
+  + =Prism.error/0=
 
 *** Lens application
-  + =Focus.Lens.view!/2=
-  + =Focus.Lens.view/2=
-  + =Focus.Lens.set/3=
-  + =Focus.Lens.over/3=
-  + =Focus.Lens.apply_list/2=
+  + =Focus.view/2=
+  + =Focus.over/3=
+  + =Focus.set/3=
+  + =Focus.view_list/2=
+  + =Focus.has/2=
+  + =Focus.hasnt/2=
+  + =Focus.fix_view/2=
+  + =Focus.fix_over/3=
+  + =Focus.fix_set/3=
 
 *** Lens composition
-  + =Focus.Lens.compose/2, (~>)=
-  + =Focus.Lens.alongside/2=
+  + =Focus.compose/2, (~>)=
+  + =Focus.alongside/2=
  
 ** Installation
 
@@ -132,4 +142,4 @@ Their real utility comes in operating on nested data. Lenses can be created by c
 
 * Footnotes
 
-[fn:1] This library currently combines Lenses, Prisms, and Traversals in its implementation of Lens.
+[fn:1] This library currently combines Lenses and Prisms with Traversals in its implementation. Until v1.0.0, the API is subject to large and frequent change.

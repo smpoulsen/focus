@@ -5,7 +5,8 @@ defmodule Prism do
   Prisms are like lenses, but used when the view focused on may not exist.
 
   This includes lists and sum types (although not backed by an explicit Maybe type,
-  we will include the [{:ok, any} | {:error}] convention as a value that a prism can focus on).
+  the [{:ok, any} | {:error}] convention is explicitly supported as a value that
+  a prism can focus on).
   """
 
   @enforce_keys [:get, :put]
@@ -132,42 +133,6 @@ defmodule Prism do
   defp get_error({:ok, _}), do: nil
   defp set_error({:error, _x}, f), do: {:ok, f}
 
-  @doc """
-  Partially apply a prism to Focus.over/3, returning a function that takes a
-  Types.traversable and an update function.
-
-  ## Examples
-
-      iex> fst = Prism.make_prism(0)
-      iex> states = [:maryland, :texas, :illinois]
-      iex> Focus.over(fst, states, &String.upcase(Atom.to_string(&1)))
-      ["MARYLAND", :texas, :illinois]
-  """
-  @spec fix_over(Prism.t, ((any) -> any)) :: ((Types.traversable) -> Types.traversable)
-  def fix_over(%Prism{} = prism, f \\ fn x -> x end) when is_function(f) do
-    fn structure ->
-      Focus.over(prism, structure, f)
-    end
-  end
-
-  @doc """
-  Partially apply a prism to Focus.set/3, returning a function that takes a
-  Types.traversable and a new value.
-
-  ## Examples
-
-      iex> fst = Prism.make_prism(0)
-      iex> states = [:maryland, :texas, :illinois]
-      iex> Focus.over(fst, states, &String.upcase(Atom.to_string(&1)))
-      ["MARYLAND", :texas, :illinois]
-  """
-  @spec fix_set(Prism.t) :: ((Types.traversable, any) -> Types.traversable)
-  def fix_set(%Prism{} = prism) do
-    fn structure, val ->
-      Focus.set(prism, structure, val)
-    end
-  end
-
   defimpl Focusable do
     @doc """
     Get a piece of a data structure that a prism focuses on;
@@ -175,7 +140,7 @@ defmodule Prism do
 
     ## Examples
 
-        iex> fst = Prism.make_prism(0)
+        iex> fst = Prism.idx(0)
         iex> states = [:maryland, :texas, :illinois]
         iex> Focus.view(fst, states)
         {:ok, :maryland}
@@ -194,7 +159,7 @@ defmodule Prism do
 
     ## Examples
 
-        iex> fst = Prism.make_prism(0)
+        iex> fst = Prism.idx(0)
         iex> states = [:maryland, :texas, :illinois]
         iex> Focus.over(fst, states, &String.upcase(Atom.to_string(&1)))
         ["MARYLAND", :texas, :illinois]
@@ -211,7 +176,7 @@ defmodule Prism do
 
     ## Examples
 
-        iex> fst = Prism.make_prism(0)
+        iex> fst = Prism.idx(0)
         iex> states = [:maryland, :texas, :illinois]
         iex> Focus.over(fst, states, &String.upcase(Atom.to_string(&1)))
         ["MARYLAND", :texas, :illinois]

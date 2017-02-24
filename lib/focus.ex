@@ -14,16 +14,19 @@ defmodule Focus do
 
   @moduledoc "Common functions usable by lenses, prisms, and traversals."
 
+  @doc "Wrapper around Focusable.view/2"
   @spec view(Types.optic, Types.traversable) :: any | nil
   def view(optic, structure) do
     Focusable.view(optic, structure)
   end
 
+  @doc "Wrapper around Focusable.over/3"
   @spec over(Types.optic, Types.traversable, ((any) -> any)) :: Types.traversable
   def over(optic, structure, f) do
     Focusable.over(optic, structure, f)
   end
 
+  @doc "Wrapper around Focusable.set/3"
   def set(optic, structure, v) do
     Focusable.set(optic, structure, v)
   end
@@ -89,7 +92,7 @@ defmodule Focus do
   ## Examples
 
       iex> nums = [1,2,3,4,5,6]
-      iex> Focus.alongside(Prism.make_prism(0), Prism.make_prism(3))
+      iex> Focus.alongside(Prism.idx(0), Prism.idx(3))
       ...> |> Focus.view(nums)
       {1, 4}
 
@@ -113,7 +116,7 @@ defmodule Focus do
   end
 
   @doc """
-  Given a list of lenses and a structure, apply Focus.view for each lens
+  Given a list of lenses and a structure, apply Focus.view/2 for each lens
   to the structure.
 
   ## Examples
@@ -123,19 +126,20 @@ defmodule Focus do
       ...>   job: "Nuclear Safety Inspector",
       ...>   children: ["Bart", "Lisa", "Maggie"]
       ...> }
-      iex> lenses = [Lens.make_lens(:name), Lens.make_lens(:children)]
-      iex> Focus.apply_list(lenses, homer)
+      iex> lenses = Lens.make_lenses(homer)
+      iex> [lenses.name, lenses.children]
+      ...> |> Focus.view_list(homer)
       ["Homer", ["Bart", "Lisa", "Maggie"]]
   """
-  @spec apply_list(list(Types.optic), Types.traversable) :: [any]
-  def apply_list(lenses, structure) when is_list(lenses) do
+  @spec view_list(list(Types.optic), Types.traversable) :: [any]
+  def view_list(lenses, structure) when is_list(lenses) do
     for lens <- lenses do
       Focus.view(lens, structure)
     end
   end
 
   @doc """
-  Check whether an optic target is present in a data structure.
+  Check whether an optic's target is present in a data structure.
 
   ## Examples
 
@@ -157,18 +161,88 @@ defmodule Focus do
   end
 
   @doc """
-  Check whether an optic target is not present in a data structure.
+  Check whether an optic's target is not present in a data structure.
 
   ## Examples
 
-  iex> first_elem = Prism.idx(1)
-  iex> first_elem |> Focus.hasnt([0])
-  true
+      iex> first_elem = Prism.idx(1)
+      iex> first_elem |> Focus.hasnt([0])
+      true
 
-  iex> name = Lens.make_lens(:name)
-  iex> name |> Focus.hasnt(%{name: "Homer"})
-  false
+      iex> name = Lens.make_lens(:name)
+      iex> name |> Focus.hasnt(%{name: "Homer"})
+      false
   """
   @spec hasnt(Types.optic, Types.traversable) :: boolean
   def hasnt(optic, structure), do: !has(optic, structure)
+
+  @doc """
+  Partially apply a lens to Focus.over/3, fixing the lens argument and
+  returning a function that takes a Types.traversable and an update function.
+
+  ## Examples
+
+      iex> upcase_name = Lens.make_lens(:name)
+      ...> |> Focus.fix_over(&String.upcase/1)
+      iex> %{name: "Bart", parents: {"Homer", "Marge"}}
+      ...> |> upcase_name.()
+      %{name: "BART", parents: {"Homer", "Marge"}}
+
+      iex> fst = Prism.idx(0)
+      iex> states = [:maryland, :texas, :illinois]
+      iex> Focus.over(fst, states, &String.upcase(Atom.to_string(&1)))
+      ["MARYLAND", :texas, :illinois]
+  """
+  @spec fix_over(Types.optic, ((any) -> any)) :: ((Types.traversable) -> Types.traversable)
+  def fix_over(%{get: _, put: _} = lens, f \\ fn x -> x end) when is_function(f) do
+    fn structure ->
+      Focus.over(lens, structure, f)
+    end
+  end
+
+  @doc """
+  Partially apply a lens to Focus.set/3, fixing the optic argument and
+  returning a function that takes a Types.traversable and a new value.
+
+  ## Examples
+
+      iex> name_setter = Lens.make_lens(:name)
+      ...> |> Focus.fix_set
+      iex> %{name: "Bart", parents: {"Homer", "Marge"}}
+      ...> |> name_setter.("Lisa")
+      %{name: "Lisa", parents: {"Homer", "Marge"}}
+
+      iex> fst = Prism.idx(0)
+      iex> states = [:maryland, :texas, :illinois]
+      iex> Focus.over(fst, states, &String.upcase(Atom.to_string(&1)))
+      ["MARYLAND", :texas, :illinois]
+  """
+  @spec fix_set(Types.optic) :: ((Types.traversable, any) -> Types.traversable)
+  def fix_set(%{get: _, put: _} = lens) do
+    fn structure, val ->
+      Focus.set(lens, structure, val)
+    end
+  end
+
+  @doc """
+  Fix Focus.view/2 on a given optic. This partially applies Focus.view/2 with the given
+  optic and returns a function that takes a Types.traversable structure.
+
+  ## Examples
+
+      iex> view_name = Lens.make_lens(:name)
+      ...> |> Focus.fix_view
+      iex> homer = %{name: "Homer"}
+      iex> view_name.(homer)
+      "Homer"
+      iex> [homer, %{name: "Marge"}, %{name: "Bart"}]
+      ...> |> Enum.map(&view_name.(&1))
+      ["Homer", "Marge", "Bart"]
+  """
+  @spec fix_view(Types.optic) :: (Types.traversable -> any)
+  def fix_view(%{get: _, put: _} = optic) do
+    fn structure ->
+      Focus.view(optic, structure)
+    end
+  end
 end
