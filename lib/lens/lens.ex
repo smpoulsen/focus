@@ -93,15 +93,15 @@ defmodule Lens do
   @doc """
   A lens that focuses on an index in a list.
 
-  ## Examples
+      ## Examples
 
-  iex> first_elem = Lens.idx(0)
-  iex> first_elem |> Focus.view([1,2,3,4,5])
-  1
+      iex> first_elem = Lens.idx(0)
+      iex> first_elem |> Focus.view([1,2,3,4,5])
+      1
 
-  iex> bad_index = Lens.idx(10)
-  iex> bad_index |> Focus.view([1,2,3])
-  nil
+      iex> bad_index = Lens.idx(10)
+      iex> bad_index |> Focus.view([1,2,3])
+      nil
   """
   @spec idx(number) :: Lens.t
   def idx(num) when is_number(num), do: make_lens(num)
@@ -124,9 +124,7 @@ defmodule Lens do
         "Marge"
     """
     @spec view(Lens.t, Types.traversable) :: any | nil
-    def view(%Lens{get: get}, structure) do
-      get.(structure)
-    end
+    def view(%Lens{get: get}, structure), do: get.(structure)
 
     @doc """
     Modify the part of a data structure that a lens Focuses on.
