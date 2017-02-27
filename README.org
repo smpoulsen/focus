@@ -5,7 +5,7 @@
 #+ATTR_HTML: :style margin-left: auto; margin-right: auto;
 [[img/focus_lens_prism.png]]
 
-An experiment with functional optics[fn:1].
+Lightweight, pure Elixir functional optics[fn:1].
 
 #+BEGIN_QUOTE
 A lens is a value that composes a getter and a setter function to produce a bidirectional view into a data structure. This definition is intentionally broad—lenses are a very general concept, and they can be applied to almost any kind of value that encapsulates data.
@@ -96,8 +96,7 @@ Their real utility comes in operating on nested data. Lenses can be created by c
 *** Optic creation
   + =Lens.make_lens/1=
   + =Lens.make_lenses/1=
-  + =Prism.make_prism/1=
-  + =Prism.idx/1=
+  + =Lens.idx/1=
 *** Pre-made optics
   + =Prism.ok/0=
   + =Prism.error/0=
@@ -123,15 +122,7 @@ Their real utility comes in operating on nested data. Lenses can be created by c
 
     #+BEGIN_SRC elixir
       def deps do
-        [{:focus, "~> 0.2.0"}]
-      end
-    #+END_SRC
-
-  2. Ensure =focus= is started before your application:
-
-    #+BEGIN_SRC elixir
-      def application do
-        [applications: [:focus]]
+        [{:focus, "~> 0.2.1"}]
       end
     #+END_SRC
 

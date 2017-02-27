@@ -92,7 +92,7 @@ defmodule Focus do
   ## Examples
 
       iex> nums = [1,2,3,4,5,6]
-      iex> Focus.alongside(Prism.idx(0), Prism.idx(3))
+      iex> Focus.alongside(Lens.idx(0), Lens.idx(3))
       ...> |> Focus.view(nums)
       {1, 4}
 
@@ -143,7 +143,7 @@ defmodule Focus do
 
   ## Examples
 
-      iex> first_elem = Prism.idx(1)
+      iex> first_elem = Lens.idx(1)
       iex> first_elem |> Focus.has([0])
       false
 
@@ -165,7 +165,7 @@ defmodule Focus do
 
   ## Examples
 
-      iex> first_elem = Prism.idx(1)
+      iex> first_elem = Lens.idx(1)
       iex> first_elem |> Focus.hasnt([0])
       true
 
@@ -188,7 +188,7 @@ defmodule Focus do
       ...> |> upcase_name.()
       %{name: "BART", parents: {"Homer", "Marge"}}
 
-      iex> fst = Prism.idx(0)
+      iex> fst = Lens.idx(0)
       iex> states = [:maryland, :texas, :illinois]
       iex> Focus.over(fst, states, &String.upcase(Atom.to_string(&1)))
       ["MARYLAND", :texas, :illinois]
@@ -212,7 +212,7 @@ defmodule Focus do
       ...> |> name_setter.("Lisa")
       %{name: "Lisa", parents: {"Homer", "Marge"}}
 
-      iex> fst = Prism.idx(0)
+      iex> fst = Lens.idx(0)
       iex> states = [:maryland, :texas, :illinois]
       iex> Focus.over(fst, states, &String.upcase(Atom.to_string(&1)))
       ["MARYLAND", :texas, :illinois]
