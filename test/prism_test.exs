@@ -25,24 +25,5 @@ defmodule PrismTest do
     {:ok, test_structure: test_structure}
   end
 
-  test "get data from a list", %{test_structure: test_structure} do
-    list_prism = Lens.make_lens(:list)
-    second_elem = Prism.make_prism(1)
-    assert (list_prism ~> second_elem |> Focus.view(test_structure)) == 4
-  end
-
-  test "set data in a list", %{test_structure: test_structure} do
-    list_prism = Lens.make_lens(:list)
-    second_elem = Prism.make_prism(1)
-    assert (list_prism ~> second_elem |> Focus.set(test_structure, "Banana")) ==
-      %{test_structure | list: [2, "Banana", 8, 16, 32]}
-  end
-
-  test "manipulate data in a list", %{test_structure: test_structure} do
-    list_prism = Lens.make_lens(:list)
-    second_elem = Prism.make_prism(1)
-    assert (list_prism ~> second_elem |> Focus.over(test_structure, fn x -> x * x * x end)) ==
-      %{test_structure | list: [2, 64, 8, 16, 32]}
-  end
 
 end

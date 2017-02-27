@@ -43,9 +43,23 @@ defmodule Lens do
   defp getter(%{__struct__: _} = s, x), do: Map.get(s, x)
   defp getter(s, x) when is_map(s), do: Access.get(s, x)
   defp getter(s, x) when is_tuple(s), do: elem(s, x)
+  defp getter(s, x) when is_list(s) do
+    if Keyword.keyword?(s) do
+      Keyword.get(s, x)
+    else
+      get_in(s, [Access.at(x)])
+    end
+  end
   defp getter(_, _), do: {:error, {:lens, :bad_data_structure}}
 
   defp setter(s, x, f) when is_map(s), do: Map.put(s, x, f)
+  defp setter(s, x, f) when is_list(s) do
+    if Keyword.keyword?(s) do
+      Keyword.put(s, x, f)
+    else
+      List.replace_at(s, x, f)
+    end
+  end
   defp setter(s, x, f) when is_tuple(s) do
     s
     |> Tuple.delete_at(x)
@@ -75,6 +89,22 @@ defmodule Lens do
       {key, Lens.make_lens(key)}
     end
   end
+
+  @doc """
+  A lens that focuses on an index in a list.
+
+  ## Examples
+
+  iex> first_elem = Lens.idx(0)
+  iex> first_elem |> Focus.view([1,2,3,4,5])
+  1
+
+  iex> bad_index = Lens.idx(10)
+  iex> bad_index |> Focus.view([1,2,3])
+  nil
+  """
+  @spec idx(number) :: Lens.t
+  def idx(num) when is_number(num), do: make_lens(num)
 
   defimpl Focusable do
     @doc """

@@ -4,9 +4,9 @@ defmodule Prism do
   @moduledoc """
   Prisms are like lenses, but used when the view focused on may not exist.
 
-  This includes lists and sum types (although not backed by an explicit Maybe type,
+  This includes sum types; although not backed by an explicit Maybe type,
   the [{:ok, any} | {:error}] convention is explicitly supported as a value that
-  a prism can focus on).
+  a prism can focus on.
   """
 
   @enforce_keys [:get, :put]
@@ -30,7 +30,7 @@ defmodule Prism do
       [:california, :texas, :illinois]
   """
   @spec make_prism(any) :: Prism.t
-  def make_prism(path) do
+  defp make_prism(path) do
     %Prism{
       get: fn s -> getter(s, path) end,
       put: fn s ->
@@ -41,39 +41,8 @@ defmodule Prism do
     }
   end
 
-  defp getter(s, x) when is_list(s) do
-    if Keyword.keyword?(s) do
-      Keyword.get(s, x)
-    else
-      get_in(s, [Access.at(x)])
-    end
-  end
   defp getter(_s, _x), do: {:error, {:prism, :bad_data_structure}}
-
-  defp setter(s, x, f) when is_list(s) do
-    if Keyword.keyword?(s) do
-      Keyword.put(s, x, f)
-    else
-      List.replace_at(s, x, f)
-    end
-  end
   defp setter(_s, _x, _f), do: {:error, {:prism, :bad_data_structure}}
-
-  @doc """
-  A prism that focuses on an index in a list.
-
-  ## Examples
-
-      iex> first_elem = Prism.idx(0)
-      iex> first_elem |> Focus.view([1,2,3,4,5])
-      {:ok, 1}
-
-      iex> bad_index = Prism.idx(10)
-      iex> bad_index |> Focus.view([1,2,3])
-      {:error, {:prism, :bad_path}}
-  """
-  @spec idx(number) :: Prism.t
-  def idx(num) when is_number(num), do: make_prism(num)
 
   @doc """
   A prism that matches an {:ok, _} tuple.
@@ -140,10 +109,9 @@ defmodule Prism do
 
     ## Examples
 
-        iex> fst = Prism.idx(0)
-        iex> states = [:maryland, :texas, :illinois]
-        iex> Focus.view(fst, states)
-        {:ok, :maryland}
+        iex> ok = Prism.ok
+        iex> ok |> Focus.view({:ok, 5})
+        {:ok, 5}
     """
     @spec view(Prism.t, Types.traversable) :: {:error, {:prism, :bad_path}} | {:ok, any}
     def view(%Prism{get: get}, structure) do
@@ -159,10 +127,9 @@ defmodule Prism do
 
     ## Examples
 
-        iex> fst = Prism.idx(0)
-        iex> states = [:maryland, :texas, :illinois]
-        iex> Focus.over(fst, states, &String.upcase(Atom.to_string(&1)))
-        ["MARYLAND", :texas, :illinois]
+        iex> ok = Prism.ok
+        iex> ok |> Focus.over({:ok, "banana"}, &String.upcase/1)
+        {:ok, "BANANA"}
     """
     @spec over(Prism.t, Types.traversable, (any -> any)) :: Types.traversable
     def over(%Prism{put: put} = prism, structure, f) do
@@ -176,10 +143,9 @@ defmodule Prism do
 
     ## Examples
 
-        iex> fst = Prism.idx(0)
-        iex> states = [:maryland, :texas, :illinois]
-        iex> Focus.over(fst, states, &String.upcase(Atom.to_string(&1)))
-        ["MARYLAND", :texas, :illinois]
+        iex> ok = Prism.ok
+        iex> ok |> Focus.set({:ok, "banana"}, "pineapple")
+        {:ok, "pineapple"}
     """
     @spec set(Prism.t, Types.traversable, any) :: Types.traversable
     def set(%Prism{put: put} = prism, structure, val) do
