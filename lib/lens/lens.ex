@@ -72,16 +72,16 @@ defmodule Lens do
 
   ## Examples
 
-     iex> lisa = %{name: "Lisa", pets: %{cat: "Snowball"}}
-     iex> lisa_lenses = Lens.make_lenses(lisa)
-     iex> lisa_lenses.name
-     ...> |> Focus.view(lisa)
-     "Lisa"
-     iex> pet_lenses = Lens.make_lenses(lisa.pets)
-     iex> lisa_lenses.pets
-     ...> ~> pet_lenses.cat
-     ...> |> Focus.set(lisa, "Snowball II")
-     %{name: "Lisa", pets: %{cat: "Snowball II"}}
+      iex> lisa = %{name: "Lisa", pets: %{cat: "Snowball"}}
+      iex> lisa_lenses = Lens.make_lenses(lisa)
+      iex> lisa_lenses.name
+      ...> |> Focus.view(lisa)
+      "Lisa"
+      iex> pet_lenses = Lens.make_lenses(lisa.pets)
+      iex> lisa_lenses.pets
+      ...> ~> pet_lenses.cat
+      ...> |> Focus.set(lisa, "Snowball II")
+      %{name: "Lisa", pets: %{cat: "Snowball II"}}
   """
   @spec make_lenses(Types.traversable) :: %{optional(atom) => Lens.t, optional(String.t) => Lens.t}
   def make_lenses(%{} = structure) do
@@ -93,7 +93,7 @@ defmodule Lens do
   @doc """
   A lens that focuses on an index in a list.
 
-      ## Examples
+  ## Examples
 
       iex> first_elem = Lens.idx(0)
       iex> first_elem |> Focus.view([1,2,3,4,5])

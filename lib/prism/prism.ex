@@ -79,13 +79,13 @@ defmodule Prism do
 
   ## Examples
 
-  iex> error = Prism.error
-  iex> error |> Focus.view({:error, 5})
-  {:ok, 5}
-  iex> error |> Focus.set({:error, 5}, "Banana")
-  {:ok, "Banana"}
-  iex> error |> Focus.view({:ok, :oops})
-  {:error, {:prism, :bad_path}}
+      iex> error = Prism.error
+      iex> error |> Focus.view({:error, 5})
+      {:ok, 5}
+      iex> error |> Focus.set({:error, 5}, "Banana")
+      {:ok, "Banana"}
+      iex> error |> Focus.view({:ok, :oops})
+      {:error, {:prism, :bad_path}}
   """
   @spec error() :: Prism.t
   def error() do
