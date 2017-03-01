@@ -37,13 +37,13 @@ Lenses can be used to access and/or modify structured data:
   person = %{name: "Homer"}
   nameLens = Lens.make_lens(:name)
 
-  Lens.view(nameLens, person) 
+  Focus.view(nameLens, person) 
   # "Homer"
 
-  Lens.set(nameLens, person, "Bart")
+  Focus.set(nameLens, person, "Bart")
   # %{name: "Bart"}
 
-  Lens.over(nameLens, person, &String.upcase/1)
+  Focus.over(nameLens, person, &String.upcase/1)
   # %{name: "HOMER"}
 #+END_SRC
 
