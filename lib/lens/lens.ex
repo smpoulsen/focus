@@ -66,13 +66,17 @@ defmodule Lens do
   @doc """
   Define a struct and derive lenses for the struct's keys as functions
   in the module.
-  ## Example
-      Given the following module:
 
-      defmodule PersonExample do
-        import Lens
-        deflenses name: nil, age: nil
-      end
+  Examples assume the following module:
+
+    ```elixir
+    defmodule PersonExample do
+      import Lens
+      deflenses name: nil, age: nil
+    end
+    ```
+
+  ## Example
 
       iex> function_exported?(PersonExample, :age_lens, 0)
       true
