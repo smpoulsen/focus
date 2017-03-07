@@ -92,6 +92,10 @@ Their real utility comes in operating on nested data. Lenses can be created by c
   # }
 #+END_SRC
 
+** Macros
+*** Optic creation
+  + =deflenses= :: A wrapper around =defstruct= that additionally defines lenses for the struct's keys inside the module. E.g. for a module =User=, =deflenses name: nil, age: nil= creates =%User{}=, =User.name_lens/0=, =User.age_lens/0=
+
 ** Functions 
 *** Optic creation
   + =Lens.make_lens/1=
