@@ -28,44 +28,17 @@ defmodule Lens do
       iex> name_lens |> Focus.set(person, "Bart")
       %{name: "Bart"}
   """
-  @spec make_lens(list) :: Lens.t
+  @spec make_lens(any) :: Lens.t
   def make_lens(path) do
     %Lens{
-      get: fn s -> getter(s, path) end,
+      get: fn s -> Lensable.getter(s, path) end,
       put: fn s ->
         fn f ->
-          setter(s, path, f)
+          Lensable.setter(s, path, f)
         end
       end
     }
   end
-
-  defp getter(%{__struct__: _} = s, x), do: Map.get(s, x)
-  defp getter(s, x) when is_map(s), do: Access.get(s, x)
-  defp getter(s, x) when is_tuple(s), do: elem(s, x)
-  defp getter(s, x) when is_list(s) do
-    if Keyword.keyword?(s) do
-      Keyword.get(s, x)
-    else
-      get_in(s, [Access.at(x)])
-    end
-  end
-  defp getter(_, _), do: {:error, {:lens, :bad_data_structure}}
-
-  defp setter(s, x, f) when is_map(s), do: Map.put(s, x, f)
-  defp setter(s, x, f) when is_list(s) do
-    if Keyword.keyword?(s) do
-      Keyword.put(s, x, f)
-    else
-      List.replace_at(s, x, f)
-    end
-  end
-  defp setter(s, x, f) when is_tuple(s) do
-    s
-    |> Tuple.delete_at(x)
-    |> Tuple.insert_at(x, f)
-  end
-  defp setter(_s, _x, _f), do: {:error, {:lens, :bad_data_structure}}
 
   @doc """
   Automatically generate the valid lenses for the supplied map-like data structure.
