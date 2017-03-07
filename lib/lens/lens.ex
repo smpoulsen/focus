@@ -57,9 +57,78 @@ defmodule Lens do
       %{name: "Lisa", pets: %{cat: "Snowball II"}}
   """
   @spec make_lenses(Types.traversable) :: %{optional(atom) => Lens.t, optional(String.t) => Lens.t}
-  def make_lenses(%{} = structure) do
+  def make_lenses(%{} = structure) when is_map(structure) do
     for key <- Map.keys(structure), into: %{} do
       {key, Lens.make_lens(key)}
+    end
+  end
+
+  @doc """
+  Define a struct and derive lenses for the struct's keys as functions
+  in the module.
+  ## Example
+      Given the following module:
+
+      defmodule PersonExample do
+        import Lens
+        deflenses name: nil, age: nil
+      end
+
+      iex> function_exported?(PersonExample, :age_lens, 0)
+      true
+      iex> function_exported?(PersonExample, :name_lens, 0)
+      true
+      iex> bart = %PersonExample{name: "Bart", age: 10}
+      iex> require IEx; IEx.pry
+      iex> PersonExample.name_lens |> Focus.view(bart)
+      "Bart"
+  end
+  """
+  defmacro deflenses(fields) do
+    quote do
+      Module.register_attribute(__MODULE__, :struct_fields, accumulate: true)
+      for field <- unquote(fields) do
+        Module.put_attribute(__MODULE__, :struct_fields, field)
+      end
+
+      Module.eval_quoted(__ENV__,
+        [
+          Lens.__defstruct__(@struct_fields),
+          Lens.__deflenses__(@struct_fields)
+        ]
+      )
+    end
+  end
+
+  @doc false
+  def __deflenses__(fields) do
+    if Keyword.keyword?(fields) do
+      for {field, _val} <- fields do
+        quote do
+          def unquote(:"#{field}_lens")() do
+            Lens.make_lens(unquote(field))
+          end
+        end
+      end
+    else
+      for field <- fields do
+          quote do
+            def unquote(:"#{field}_lens")() do
+              Lens.make_lens(unquote(field))
+            end
+          end
+      end
+    end
+  end
+
+  @doc false
+  def __defstruct__(fields) do
+    quote do
+      defstruct unquote(Macro.escape(fields))
+      defimpl Lensable, for: __MODULE__ do
+        def getter(s, x), do: Map.get(s, x)
+        def setter(s, x, f), do: Map.put(s, x, f)
+      end
     end
   end
 

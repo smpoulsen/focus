@@ -2,6 +2,13 @@ defmodule LensTest do
   use ExUnit.Case
   use Quixir
   import Focus
+
+  defmodule PersonExample do
+    @moduledoc "Used in the deflenses doctest example"
+    import Lens
+    deflenses name: nil, age: nil
+  end
+
   doctest Lens
   doctest Focusable.Lens
 
