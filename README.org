@@ -134,7 +134,7 @@ Their real utility comes in operating on nested data. Lenses can be created by c
 
     #+BEGIN_SRC elixir
       def deps do
-        [{:focus, "~> 0.2.2"}]
+        [{:focus, "~> 0.2.3"}]
       end
     #+END_SRC
 
