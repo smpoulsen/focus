@@ -83,7 +83,6 @@ defmodule Lens do
       iex> function_exported?(PersonExample, :name_lens, 0)
       true
       iex> bart = %PersonExample{name: "Bart", age: 10}
-      iex> require IEx; IEx.pry
       iex> PersonExample.name_lens |> Focus.view(bart)
       "Bart"
   end
