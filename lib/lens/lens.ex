@@ -206,10 +206,8 @@ defmodule Lens do
         %{name: "Marge", address: %{street: "42 Wallaby Way", city: "Springfield"}}
     """
     @spec set(Lens.t, Types.traversable, any) :: Types.traversable
-    def set(%Lens{put: setter} = lens, structure, val) do
-      with {:ok, _d} <- Lens.safe_view(lens, structure) do
-        setter.(structure).(val)
-      end
+    def set(lens, structure, val) do
+      over(lens, structure, fn _ -> val end)
     end
   end
 
