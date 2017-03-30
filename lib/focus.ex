@@ -116,6 +116,53 @@ defmodule Focus do
   end
 
   @doc """
+  Map a function that takes as its argument the value that an optic focuses on
+  over a list of traversable structures. The function is applied each structure
+  in the list that the lens focuses on; any list elements that don't have a match
+  for the lens are passed through.
+
+  ## Examples
+
+      iex> family = [
+      ...>   %{name: "Homer", pets: ["Snowball"]},
+      ...>   %{name: "Marge", pets: ["Snowball"]},
+      ...>   %{name: "Bart", pets: ["Snowball"]},
+      ...>   %{name: "Lisa", pets: ["Snowball"]},
+      ...>   %{other_key: "I'm not affected"},
+      ...> ]
+      iex> Lens.make_lens(:pets)
+      ...> |> Focus.map(fn pets ->
+      ...>   ["Santa's Little Helper" | pets]
+      ...> end, family)
+      [
+        %{name: "Homer", pets: ["Santa's Little Helper", "Snowball"]},
+        %{name: "Marge", pets: ["Santa's Little Helper", "Snowball"]},
+        %{name: "Bart", pets: ["Santa's Little Helper", "Snowball"]},
+        %{name: "Lisa", pets: ["Santa's Little Helper", "Snowball"]},
+        %{other_key: "I'm not affected"},
+      ]
+      iex> Lens.make_lens(:name)
+      ...> |> Focus.map(&(String.upcase(&1)), family)
+      [
+        %{name: "HOMER", pets: ["Snowball"]},
+        %{name: "MARGE", pets: ["Snowball"]},
+        %{name: "BART", pets: ["Snowball"]},
+        %{name: "LISA", pets: ["Snowball"]},
+        %{other_key: "I'm not affected"},
+      ]
+
+  """
+  @spec map(Types.optic, fun, Types.traversable) :: Types.traversable
+  def map(optic, f, structure) do
+    for s <- structure do
+      case Focus.view(optic, s) do
+        nil -> s
+        _ -> Focus.over(optic, s, f)
+      end
+    end
+  end
+
+  @doc """
   Given a list of lenses and a structure, apply Focus.view/2 for each lens
   to the structure.
 
