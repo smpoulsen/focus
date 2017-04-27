@@ -53,8 +53,8 @@ defmodule Focus do
   def compose(%{get: get_x, put: set_x}, %{get: get_y, put: set_y}) do
     %Lens{
       get: fn s ->
-      get_y.(get_x.(s))
-    end,
+        get_y.(get_x.(s))
+      end,
       put: fn s ->
         fn f ->
           set_x.(s).(set_y.(get_x.(s)).(f))

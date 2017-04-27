@@ -10,7 +10,13 @@ end
 
 defimpl Lensable, for: Map do
   def getter(s, x), do: Access.get(s, x)
-  def setter(s, x, f), do: Map.put(s, x, f)
+  def setter(s, x, f) do
+    if Map.has_key?(s, x) do
+      Map.put(s, x, f)
+    else
+      s
+    end
+  end
 end
 
 defimpl Lensable, for: Tuple do
