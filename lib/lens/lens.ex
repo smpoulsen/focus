@@ -222,11 +222,11 @@ defmodule Lens do
       iex> Lens.safe_view(name_lens, marge)
       {:ok, "Marge"}
   """
-  @spec safe_view(Lens.t, Types.traversable) :: {:error, :bad_arg} | {:ok, any}
+  @spec safe_view(Lens.t, Types.traversable) :: {:error, {:lens, :bad_path}} | {:ok, any}
   def safe_view(%Lens{} = lens, structure) do
     res = Focus.view(lens, structure)
     case res do
-      nil -> {:error, {:lens, :bad_path}}
+      {:error, {:lens, :bad_path}} -> {:error, {:lens, :bad_path}}
       _   -> {:ok, res}
     end
   end

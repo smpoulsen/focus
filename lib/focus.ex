@@ -53,11 +53,21 @@ defmodule Focus do
   def compose(%{get: get_x, put: set_x}, %{get: get_y, put: set_y}) do
     %Lens{
       get: fn s ->
-        get_y.(get_x.(s))
+        case get_x.(s) do
+          {:error, {:lens, :bad_path}} ->
+            {:error, {:lens, :bad_path}}
+          x ->
+            get_y.(x)
+        end
       end,
       put: fn s ->
         fn f ->
-          set_x.(s).(set_y.(get_x.(s)).(f))
+          case get_x.(s) do
+            {:error, {:lens, :bad_path}} ->
+              {:error, {:lens, :bad_path}}
+            x ->
+              set_x.(s).(set_y.(x).(f))
+          end
         end
       end
     }

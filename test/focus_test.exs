@@ -31,8 +31,13 @@ defmodule FocusTest do
     ~> lenses.name
     |> Focus.set(test_structure, "Test")
 
-    refute Map.has_key?(test_structure.address, :name)
-    refute Map.has_key?(updated.address, :name)
-    assert updated == test_structure
+    assert updated == {:error, {:lens, :bad_path}}
+  end
+
+  test "Trying to access non-existing lenses returns an error", %{test_structure: test_structure} do
+    nope_lens = Lens.make_lens(:nope)
+
+    assert Focus.view(nope_lens, test_structure) == {:error, {:lens, :bad_path}}
+    assert Focus.set(nope_lens, test_structure, "nothing") == {:error, {:lens, :bad_path}}
   end
 end

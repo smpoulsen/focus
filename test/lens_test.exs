@@ -69,6 +69,16 @@ defmodule LensTest do
       %{test_structure | name: "remoH"}
   end
 
+  test "view a key with a value of nil in a map" do
+    s = %{name: nil}
+    assert Focus.view(Lens.make_lens(:name), s) == nil
+  end
+
+  test "update a key with a value of nil in a map" do
+    s = %{name: nil}
+    assert Focus.set(Lens.make_lens(:name), s, "Bart") == %{name: "Bart"}
+  end
+
   test "get data from a tuple", %{test_structure: test_structure} do
     tuple_lens = Lens.make_lens(:tuple)
     first_elem = Lens.make_lens(0)
@@ -135,5 +145,4 @@ defmodule LensTest do
     assert (list_lens ~> second_elem |> Focus.over(test_structure, fn x -> x * x * x end)) ==
       %{test_structure | list: [2, 64, 8, 16, 32]}
   end
-
 end

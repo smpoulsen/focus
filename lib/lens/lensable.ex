@@ -9,7 +9,8 @@ defprotocol Lensable do
 end
 
 defimpl Lensable, for: Map do
-  def getter(s, x), do: Access.get(s, x)
+  def getter(s, x), do: Access.get(s, x, {:error, {:lens, :bad_path}})
+  def setter({:error, {:lens, :bad_path}} = e), do: e
   def setter(s, x, f) do
     if Map.has_key?(s, x) do
       Map.put(s, x, f)
