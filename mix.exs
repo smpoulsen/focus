@@ -3,7 +3,7 @@ defmodule Focus.Mixfile do
 
   def project do
     [app: :focus,
-     version: "0.2.4",
+     version: "0.3.0",
      elixir: "~> 1.4",
      build_embedded: Mix.env == :prod,
      consolidate_protocols: Mix.env != :test,
