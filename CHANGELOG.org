@@ -1,0 +1,2 @@
+* v0.3.1 
++ Add pipeline-able versions of ~Focus.view/2~, ~Focus.set/3~, ~Focus.over/3~

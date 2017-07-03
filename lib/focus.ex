@@ -14,22 +14,113 @@ defmodule Focus do
 
   @moduledoc "Common functions usable by lenses, prisms, and traversals."
 
-  @doc "Wrapper around Focusable.view/2"
+  @doc """
+  Wrapper around Focusable.view/2
+
+  Arguments can be passed in with either the lens first and data structure second or vice versa.
+  Passing the data structure first allows Focus.view/2 to fit neatly in pipeline operations.
+
+  ## Examples
+
+      iex> marge = %{
+      ...>   name: "Marge",
+      ...>   address: %{
+      ...>     street: "123 Fake St.",
+      ...>     city: "Springfield"
+      ...>   }
+      ...> }
+      iex> address_lens = Lens.make_lens(:address)
+      iex> address_lens
+      ...> |> Focus.view(marge)
+      %{street: "123 Fake St.", city: "Springfield"}
+      iex> marge
+      ...> |> Focus.view(address_lens)
+      %{street: "123 Fake St.", city: "Springfield"}
+  """
   @spec view(Types.optic, Types.traversable) :: any | nil
-  def view(optic, structure) do
-    Focusable.view(optic, structure)
-  end
+  @spec view(Types.traversable, Types.optic) :: any | nil
+  def view(optic = %{get: _, put: _}, structure), do: Focusable.view(optic, structure)
+  def view(structure, optic = %{get: _, put: _}), do: Focusable.view(optic, structure)
 
-  @doc "Wrapper around Focusable.over/3"
+  @doc """
+  Wrapper around Focusable.over/3
+
+  Arguments can be passed in with either the lens first and data structure second or vice versa.
+  Passing the data structure first allows Focus.over/3 to fit neatly in pipeline operations.
+
+  ## Examples
+
+      iex> marge = %{
+      ...>   name: "Marge",
+      ...>   address: %{
+      ...>     street: "123 Fake St.",
+      ...>     city: "Springfield"
+      ...>   }
+      ...> }
+      iex> name_lens = Lens.make_lens(:name)
+      iex> name_lens
+      ...> |> Focus.over(marge, &String.upcase/1)
+      %{
+        name: "MARGE",
+        address: %{
+          street: "123 Fake St.",
+          city: "Springfield"
+        }
+      }
+      iex> marge
+      ...> |> Focus.over(name_lens, &String.upcase/1)
+      %{
+        name: "MARGE",
+        address: %{
+          street: "123 Fake St.",
+          city: "Springfield"
+        }
+      }
+  """
   @spec over(Types.optic, Types.traversable, ((any) -> any)) :: Types.traversable
-  def over(optic, structure, f) do
-    Focusable.over(optic, structure, f)
-  end
+  @spec over(Types.traversable, Types.optic, ((any) -> any)) :: Types.traversable
+  def over(optic = %{get: _, put: _}, structure, f), do: Focusable.over(optic, structure, f)
+  def over(structure, optic = %{get: _, put: _}, f), do: Focusable.over(optic, structure, f)
 
-  @doc "Wrapper around Focusable.set/3"
-  def set(optic, structure, v) do
-    Focusable.set(optic, structure, v)
-  end
+  @doc """
+  Wrapper around Focusable.set/3
+
+  Arguments can be passed in with either the lens first and data structure second or vice versa.
+  Passing the data structure first allows Focus.set/3 to fit neatly in pipeline operations.
+
+  ## Examples
+
+  iex> marge = %{
+  ...>   name: "Marge",
+  ...>   address: %{
+  ...>     street: "123 Fake St.",
+  ...>     city: "Springfield"
+  ...>   }
+  ...> }
+  iex> name_lens = Lens.make_lens(:name)
+  iex> name_lens
+  ...> |> Focus.set(marge, "Marjorie")
+  %{
+    name: "Marjorie",
+    address: %{
+      street: "123 Fake St.",
+      city: "Springfield"
+    }
+  }
+  iex> marge
+  ...> |> Focus.set(name_lens, "Marjorie")
+  %{
+    name: "Marjorie",
+    address: %{
+      street: "123 Fake St.",
+      city: "Springfield"
+    }
+  }
+  """
+  @spec set(Types.traversable, Types.optic, (any)) :: Types.traversable
+  @spec set(Types.optic, Types.traversable, any) :: Types.traversable
+  def set(optic = %{get: _, put: _}, structure, v), do: Focusable.set(optic, structure, v)
+  def set(structure, optic = %{get: _, put: _}, v), do: Focusable.set(optic, structure, v)
 
   @doc """
   Compose with most general lens on the left
