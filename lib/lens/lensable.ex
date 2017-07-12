@@ -31,12 +31,18 @@ end
 
 defimpl Lensable, for: List do
   def getter(s, x) do
-    if Keyword.keyword?(s) do
+    if Keyword.keyword?(s) && !Enum.empty?(s) do
       Keyword.get(s, x)
     else
-      get_in(s, [Access.at(x)])
+      if is_number(x) do
+        get_in(s, [Access.at(x)])
+      else
+        {:error, {:lens, :bad_path}}
+      end
     end
   end
+
+  def setter([] = s, x, f), do: List.replace_at(s, x, f)
   def setter(s, x, f) do
     if Keyword.keyword?(s) do
       Keyword.put(s, x, f)
