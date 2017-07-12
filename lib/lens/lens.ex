@@ -213,7 +213,7 @@ defmodule Lens do
 
   @doc """
   Get a piece of a data structure that a lens Focuses on;
-  returns {:ok, data} | {:error, :bad_lens_path}
+  returns {:ok, data} | {:error, :bad_lens_path} | {:error, :bad_data_structure}
 
   ## Examples
 
@@ -222,11 +222,11 @@ defmodule Lens do
       iex> Lens.safe_view(name_lens, marge)
       {:ok, "Marge"}
   """
-  @spec safe_view(Lens.t, Types.traversable) :: {:error, {:lens, :bad_path}} | {:ok, any}
+  @spec safe_view(Lens.t, Types.traversable) :: {:error, {:lens, :bad_path}} | {:error, {:lens, :bad_data_structure}} | {:ok, any}
   def safe_view(%Lens{} = lens, structure) do
     res = Focus.view(lens, structure)
     case res do
-      {:error, {:lens, :bad_path}} -> {:error, {:lens, :bad_path}}
+      {:error, err} -> {:error, err}
       _   -> {:ok, res}
     end
   end

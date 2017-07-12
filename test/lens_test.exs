@@ -145,4 +145,17 @@ defmodule LensTest do
     assert (list_lens ~> second_elem |> Focus.over(test_structure, fn x -> x * x * x end)) ==
       %{test_structure | list: [2, 64, 8, 16, 32]}
   end
+
+  test "safe_view returns an error when composing into a non-existing path" do
+    bad_path = %{list: []}
+    good_path = %{list: [%{value: :hello}]}
+
+    l = Lens.make_lens(:list)
+    i = Lens.idx(0)
+    v = Lens.make_lens(:value)
+
+    assert Lens.safe_view(l ~> i ~> v, bad_path) == {:error, {:lens, :bad_data_structure}}
+    assert Lens.safe_view(l ~> l ~> v, bad_path) == {:error, {:lens, :bad_path}}
+    assert Lens.safe_view(l ~> i ~> v, good_path) == {:ok, :hello}
+  end
 end
