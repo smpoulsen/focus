@@ -154,8 +154,20 @@ defmodule LensTest do
     i = Lens.idx(0)
     v = Lens.make_lens(:value)
 
-    assert Lens.safe_view(l ~> i ~> v, bad_path) == {:error, {:lens, :bad_data_structure}}
+    assert Lens.safe_view(l ~> i ~> v, bad_path) == {:error, {:lens, :bad_path}}
     assert Lens.safe_view(l ~> l ~> v, bad_path) == {:error, {:lens, :bad_path}}
     assert Lens.safe_view(l ~> i ~> v, good_path) == {:ok, :hello}
+  end
+
+  test "safe_view doesn't crash when composing into multiple non-existing paths" do
+    data = %{a: []}
+    a = Lens.make_lens(:a)
+    b = Lens.make_lens(:b)
+    c = Lens.make_lens(:c)
+    d = Lens.make_lens(:d)
+    i0 = Lens.idx(0)
+
+    a ~> b ~> c ~> d |> Lens.safe_view(data) == {:error, {:lens, :bad_path}}
+    a ~> i0 ~> b ~> c |> Lens.safe_view(data) == {:error, {:lens, :bad_path}}
   end
 end

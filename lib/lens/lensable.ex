@@ -34,7 +34,7 @@ defimpl Lensable, for: List do
     if Keyword.keyword?(s) && !Enum.empty?(s) do
       Keyword.get(s, x)
     else
-      if is_number(x) do
+      if is_number(x) && !Enum.empty?(s) do
         get_in(s, [Access.at(x)])
       else
         {:error, {:lens, :bad_path}}
