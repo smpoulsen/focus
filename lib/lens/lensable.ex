@@ -21,7 +21,10 @@ defimpl Lensable, for: Map do
 end
 
 defimpl Lensable, for: Tuple do
-  def getter(s, x), do: elem(s, x)
+  def getter(s, x) when is_tuple(s) and is_integer(x) do
+    elem(s, x)
+  end
+  def getter(_, _), do: {:error, {:lens, :bad_path}}
   def setter(s, x, f) do
     s
     |> Tuple.delete_at(x)
