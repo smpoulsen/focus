@@ -140,7 +140,7 @@ Their real utility comes in operating on nested data. Lenses can be created by c
 
 ** References
 + [[https://www.schoolofhaskell.com/user/tel/a-little-lens-starter-tutorial][A Little Lens Starter Tutorial]]
-+ [[https://www21.in.tum.de/teaching/fp/SS15/papers/17.pdf][Lenses in Functional Programming]]
++ [[https://github.com/ekmett/lens/wiki/FAQ#lens-resources][ekmett/lens package FAQ]]
 + [[https://hackage.haskell.org/package/lens-tutorial-1.0.2/docs/Control-Lens-Tutorial.html][Control.Lens Tutorial]]
 
 * Footnotes
