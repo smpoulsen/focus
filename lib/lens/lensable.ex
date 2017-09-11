@@ -21,7 +21,7 @@ defimpl Lensable, for: Map do
 end
 
 defimpl Lensable, for: Tuple do
-  def getter({:error, e} = error, _x), do:  error
+  def getter({:error, _e} = error, _x), do:  error
   def getter(s, x), do: elem(s, x)
   def setter(s, x, f) do
     s
