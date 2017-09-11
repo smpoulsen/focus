@@ -167,7 +167,7 @@ defmodule LensTest do
     d = Lens.make_lens(:d)
     i0 = Lens.idx(0)
 
-    a ~> b ~> c ~> d |> Lens.safe_view(data) == {:error, {:lens, :bad_path}}
-    a ~> i0 ~> b ~> c |> Lens.safe_view(data) == {:error, {:lens, :bad_path}}
+    assert a ~> b ~> c ~> d |> Lens.safe_view(data) == {:error, {:lens, :bad_path}}
+    assert a ~> i0 ~> b ~> c |> Lens.safe_view(data) == {:error, {:lens, :bad_path}}
   end
 end

@@ -1,7 +1,6 @@
 defmodule PrismTest do
   use ExUnit.Case
   use Quixir
-  import Focus
   doctest Prism
   doctest Focusable.Prism
 
@@ -24,6 +23,4 @@ defmodule PrismTest do
 
     {:ok, test_structure: test_structure}
   end
-
-
 end
