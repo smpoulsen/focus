@@ -18,33 +18,6 @@ defmodule Prism do
   }
 
   @doc """
-  Define a prism to focus on a part of a data structure.
-
-  ## Examples
-
-      iex> fst = Prism.make_prism(0)
-      iex> states = [:maryland, :texas, :illinois]
-      iex> fst.get.(states)
-      :maryland
-      iex> fst.put.(states).(:california)
-      [:california, :texas, :illinois]
-  """
-  @spec make_prism(any) :: Prism.t
-  defp make_prism(path) do
-    %Prism{
-      get: fn s -> getter(s, path) end,
-      put: fn s ->
-        fn f ->
-          setter(s, path, f)
-        end
-      end
-    }
-  end
-
-  defp getter(_s, _x), do: {:error, {:prism, :bad_data_structure}}
-  defp setter(_s, _x, _f), do: {:error, {:prism, :bad_data_structure}}
-
-  @doc """
   A prism that matches an {:ok, _} tuple.
 
   ## Examples
