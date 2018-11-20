@@ -54,6 +54,19 @@ defimpl Lensable, for: List do
 end
 
 defimpl Lensable, for: Any do
-  def getter(_, _), do: {:error, {:lens, :bad_data_structure}}
-  def setter(_s, _x, _f), do: {:error, {:lens, :bad_data_structure}}
+  @bad_data_structure_error {:error, {:lens, :bad_data_structure}}
+  def getter(s, x) do
+    with %_type{} <- s do
+     Lensable.getter(Map.from_struct(s), x)
+    else
+      _ -> @bad_data_structure_error
+    end
+  end
+  def setter(s, x, f) do
+    with %type{} <- s do
+      struct(type, Lensable.setter(Map.from_struct(s), x, f))
+    else
+      _ -> @bad_data_structure_error
+    end
+  end
 end
