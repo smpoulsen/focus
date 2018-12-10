@@ -9,6 +9,10 @@ defmodule LensTest do
     deflenses name: nil, age: nil
   end
 
+  defmodule BasicStruct do
+    defstruct name: ""
+  end
+
   doctest Lens
   doctest Focusable.Lens
 
@@ -169,5 +173,18 @@ defmodule LensTest do
 
     assert a ~> b ~> c ~> d |> Lens.safe_view(data) == {:error, {:lens, :bad_path}}
     assert a ~> i0 ~> b ~> c |> Lens.safe_view(data) == {:error, {:lens, :bad_path}}
+  end
+
+  test "lenses can be used on arbitrary structs" do
+    alias LensTest.BasicStruct
+
+    foo = %BasicStruct{name: "foo"}
+    name = Lens.make_lens(:name)
+    assert name |> Focus.view(foo) === "foo"
+
+    bar = name |> Focus.set(foo, "bar")
+    assert bar === %BasicStruct{name: "bar"}
+
+    assert name |> Focus.view(bar) === "bar"
   end
 end
