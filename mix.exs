@@ -36,9 +36,9 @@ defmodule Focus.Mixfile do
     [
       name: :focus,
       licenses: ["BSD2"],
-      maintainers: ["Travis Poulsen"],
+      maintainers: ["Sylvie Poulsen"],
       links: %{
-        "GitHub" => "https://github.com/tpoulsen/focus",
+        "GitHub" => "https://github.com/smpoulsen/focus",
       }
     ]
   end
