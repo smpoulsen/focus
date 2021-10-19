@@ -1,2 +1,5 @@
-* v0.3.1 
+* v0.4.0
++ Fix compiler warnings
+
+* v0.3.1
 + Add pipeline-able versions of ~Focus.view/2~, ~Focus.set/3~, ~Focus.over/3~
