@@ -1,6 +1,5 @@
 defmodule PrismTest do
   use ExUnit.Case
-  use Quixir
   doctest Prism
   doctest Focusable.Prism
 

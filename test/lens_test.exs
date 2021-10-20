@@ -1,6 +1,6 @@
 defmodule LensTest do
   use ExUnit.Case
-  use Quixir
+  use ExUnitProperties
   import Focus
 
   defmodule PersonExample do
@@ -36,22 +36,25 @@ defmodule LensTest do
     {:ok, test_structure: test_structure}
   end
 
-  test "Lens law: Put/Get - get a value that is set" do
-    ptest structure: map(like: %{name: string()}), new_name: string() do
+  property "Lens law: Put/Get - get a value that is set" do
+    check all structure <- StreamData.fixed_map(%{name: StreamData.string(:alphanumeric)}),
+              new_name <- StreamData.string(:alphanumeric) do
       lens = Lens.make_lens(:name)
       assert Focus.view(lens, Focus.set(lens, structure, new_name)) == new_name
     end
   end
 
-  test "Lens law: Get/Put - setting a value that is retrieved is doing nothing" do
-    ptest structure: map(like: %{name: string()}) do
+  property "Lens law: Get/Put - setting a value that is retrieved is doing nothing" do
+    check all structure <- StreamData.fixed_map(%{name: StreamData.string(:alphanumeric)}) do
       lens = Lens.make_lens(:name)
       assert Focus.set(lens, structure, Focus.view(lens, structure)) == structure
     end
   end
 
-  test "Lens law: Put/Put - last set value wins" do
-    ptest structure: map(like: %{name: string()}), name1: string(), name2: string() do
+  property "Lens law: Put/Put - last set value wins" do
+    check all structure <- StreamData.fixed_map(%{name: StreamData.string(:alphanumeric)}),
+              name1 <- StreamData.string(:alphanumeric),
+              name2 <- StreamData.string(:alphanumeric) do
       lens = Lens.make_lens(:name)
       assert Focus.view(lens, Focus.set(lens, Focus.set(lens, structure, name1), name2)) == name2
     end

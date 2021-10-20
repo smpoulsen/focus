@@ -14,7 +14,12 @@ defmodule Focus.Mixfile do
   end
 
   def application do
-    [applications: [:logger]]
+    extra_apps = case Mix.env() do
+                   :test -> [:stream_data]
+                   _ -> []
+
+    end
+    [applications: [:logger | extra_apps]]
   end
 
   def description() do
@@ -28,7 +33,7 @@ defmodule Focus.Mixfile do
       {:ex_doc, ">= 0.25.0", only: :dev},
       {:credo, "~> 1.5.0", only: [:dev, :test]},
       {:dialyxir, "~> 1.1.0", only: [:dev, :test]},
-      {:quixir, "~> 0.9.3", only: [:test]}
+      {:stream_data, "~> 0.5.0", only: [:test]}
     ]
   end
 
