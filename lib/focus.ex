@@ -37,10 +37,9 @@ defmodule Focus do
       ...> |> Focus.view(address_lens)
       %{street: "123 Fake St.", city: "Springfield"}
   """
-  @spec view(Types.optic, Types.traversable) :: any | nil
-  @spec view(Types.traversable, Types.optic) :: any | nil
-  def view(optic = %{get: _, put: _}, structure), do: Focusable.view(optic, structure)
-  def view(structure, optic = %{get: _, put: _}), do: Focusable.view(optic, structure)
+  @spec view(Types.optic | Types.traversable, Types.traversable | Types.optic) :: any | nil
+  def view(%{get: _, put: _} = optic, structure), do: Focusable.view(optic, structure)
+  def view(structure, %{get: _, put: _} = optic), do: Focusable.view(optic, structure)
 
   @doc """
   Wrapper around Focusable.over/3
@@ -77,10 +76,9 @@ defmodule Focus do
         }
       }
   """
-  @spec over(Types.optic, Types.traversable, ((any) -> any)) :: Types.traversable
-  @spec over(Types.traversable, Types.optic, ((any) -> any)) :: Types.traversable
-  def over(optic = %{get: _, put: _}, structure, f), do: Focusable.over(optic, structure, f)
-  def over(structure, optic = %{get: _, put: _}, f), do: Focusable.over(optic, structure, f)
+  @spec over(Types.optic | Types.traversable, Types.traversable | Types.optic, ((any) -> any)) :: Types.traversable
+  def over(%{get: _, put: _} = optic, structure, f), do: Focusable.over(optic, structure, f)
+  def over(structure, %{get: _, put: _} = optic, f), do: Focusable.over(optic, structure, f)
 
   @doc """
   Wrapper around Focusable.set/3
@@ -117,10 +115,9 @@ defmodule Focus do
     }
   }
   """
-  @spec set(Types.traversable, Types.optic, (any)) :: Types.traversable
-  @spec set(Types.optic, Types.traversable, any) :: Types.traversable
-  def set(optic = %{get: _, put: _}, structure, v), do: Focusable.set(optic, structure, v)
-  def set(structure, optic = %{get: _, put: _}, v), do: Focusable.set(optic, structure, v)
+  @spec set(Types.traversable | Types.optic, Types.optic | Types.traversable, any) :: Types.traversable
+  def set(%{get: _, put: _} = optic, structure, v), do: Focusable.set(optic, structure, v)
+  def set(structure, %{get: _, put: _} = optic, v), do: Focusable.set(optic, structure, v)
 
   @doc """
   Compose with most general lens on the left

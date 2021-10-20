@@ -1,5 +1,4 @@
 * Focus
-[[https://circleci.com/gh/smpoulsen/focus][https://circleci.com/gh/smpoulsen/focus.svg?style=svg]]
 [[https://img.shields.io/hexpm/v/focus.svg]]
 
 #+ATTR_HTML: :style margin-left: auto; margin-right: auto;
@@ -9,8 +8,8 @@ Lightweight, pure Elixir functional optics[fn:1].
 
 #+BEGIN_QUOTE
 A lens is a value that composes a getter and a setter function to produce a bidirectional view into a data structure. This definition is intentionally broad—lenses are a very general concept, and they can be applied to almost any kind of value that encapsulates data.
-  -- [[https://docs.racket-lang.org/lens/lens-intro.html][Racket 'lens' documentation]] 
-#+END_QUOTE 
+  -- [[https://docs.racket-lang.org/lens/lens-intro.html][Racket 'lens' documentation]]
+#+END_QUOTE
 
 ** Usage
 
@@ -37,7 +36,7 @@ Lenses can be used to access and/or modify structured data:
   person = %{name: "Homer"}
   nameLens = Lens.make_lens(:name)
 
-  Focus.view(nameLens, person) 
+  Focus.view(nameLens, person)
   # "Homer"
 
   Focus.set(nameLens, person, "Bart")
@@ -94,7 +93,7 @@ Their real utility comes in operating on nested data. Lenses can be created by c
 
 ** Macros
 *** Optic creation
-  + =deflenses= :: A wrapper around =defstruct= that additionally defines lenses for the struct's keys inside the module. 
+  + =deflenses= :: A wrapper around =defstruct= that additionally defines lenses for the struct's keys inside the module.
       #+BEGIN_SRC elixir
         defmodule User do
           import Lens
@@ -104,7 +103,7 @@ Their real utility comes in operating on nested data. Lenses can be created by c
         end
       #+END_SRC
 
-** Functions 
+** Functions
 *** Optic creation
   + =Lens.make_lens/1=
   + =Lens.make_lenses/1=
@@ -127,7 +126,7 @@ Their real utility comes in operating on nested data. Lenses can be created by c
 *** Optic composition
   + =Focus.compose/2, (~>)=
   + =Focus.alongside/2=
- 
+
 ** Installation
 
   1. Add =focus= to your list of dependencies in =mix.exs=:
