@@ -13,9 +13,9 @@ defmodule Prism do
   defstruct [:get, :put]
 
   @type t :: %Prism{
-    get: ((any) -> any),
-    put: (((any) -> any) -> any)
-  }
+          get: (any -> any),
+          put: ((any -> any) -> any)
+        }
 
   @doc """
   A prism that matches an {:ok, _} tuple.
@@ -30,7 +30,7 @@ defmodule Prism do
       iex> ok |> Focus.view({:error, :oops})
       {:error, {:prism, :bad_path}}
   """
-  @spec ok() :: Prism.t
+  @spec ok() :: Prism.t()
   def ok() do
     %Prism{
       get: fn s -> get_ok(s) end,
@@ -41,6 +41,7 @@ defmodule Prism do
       end
     }
   end
+
   defp get_ok({:ok, x}), do: x
   defp get_ok({:error, _}), do: nil
   defp set_ok({:ok, _x}, f), do: {:ok, f}
@@ -60,7 +61,7 @@ defmodule Prism do
       iex> error |> Focus.view({:ok, :oops})
       {:error, {:prism, :bad_path}}
   """
-  @spec error() :: Prism.t
+  @spec error() :: Prism.t()
   def error() do
     %Prism{
       get: fn s -> get_error(s) end,
@@ -71,6 +72,7 @@ defmodule Prism do
       end
     }
   end
+
   defp get_error({:error, x}), do: x
   defp get_error({:ok, _}), do: nil
   defp set_error({:error, _x}, f), do: {:ok, f}
@@ -86,12 +88,13 @@ defmodule Prism do
         iex> ok |> Focus.view({:ok, 5})
         {:ok, 5}
     """
-    @spec view(Prism.t, Types.traversable) :: {:error, {:prism, :bad_path}} | {:ok, any}
+    @spec view(Prism.t(), Types.traversable()) :: {:error, {:prism, :bad_path}} | {:ok, any}
     def view(%Prism{get: get}, structure) do
       res = get.(structure)
+
       case res do
         nil -> {:error, {:prism, :bad_path}}
-        _   -> {:ok, res}
+        _ -> {:ok, res}
       end
     end
 
@@ -104,7 +107,7 @@ defmodule Prism do
         iex> ok |> Focus.over({:ok, "banana"}, &String.upcase/1)
         {:ok, "BANANA"}
     """
-    @spec over(Prism.t, Types.traversable, (any -> any)) :: Types.traversable
+    @spec over(Prism.t(), Types.traversable(), (any -> any)) :: Types.traversable()
     def over(%Prism{put: put} = prism, structure, f) do
       with {:ok, data_view} <- view(prism, structure) do
         put.(structure).(f.(data_view))
@@ -120,7 +123,7 @@ defmodule Prism do
         iex> ok |> Focus.set({:ok, "banana"}, "pineapple")
         {:ok, "pineapple"}
     """
-    @spec set(Prism.t, Types.traversable, any) :: Types.traversable
+    @spec set(Prism.t(), Types.traversable(), any) :: Types.traversable()
     def set(%Prism{put: put} = prism, structure, val) do
       with {:ok, _data_view} <- view(prism, structure) do
         put.(structure).(val)

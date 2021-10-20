@@ -12,9 +12,9 @@ defmodule Lens do
   defstruct [:get, :put]
 
   @type t :: %Lens{
-    get: ((any) -> any),
-    put: (((any) -> any) -> any)
-  }
+          get: (any -> any),
+          put: ((any -> any) -> any)
+        }
 
   @doc """
   Define a lens to Focus on a part of a data structure.
@@ -28,7 +28,7 @@ defmodule Lens do
       iex> name_lens |> Focus.set(person, "Bart")
       %{name: "Bart"}
   """
-  @spec make_lens(any) :: Lens.t
+  @spec make_lens(any) :: Lens.t()
   def make_lens(path) do
     %Lens{
       get: fn s -> Lensable.getter(s, path) end,
@@ -56,7 +56,10 @@ defmodule Lens do
       ...> |> Focus.set(lisa, "Snowball II")
       %{name: "Lisa", pets: %{cat: "Snowball II"}}
   """
-  @spec make_lenses(Types.traversable) :: %{optional(atom) => Lens.t, optional(String.t) => Lens.t}
+  @spec make_lenses(Types.traversable()) :: %{
+          optional(atom) => Lens.t(),
+          optional(String.t()) => Lens.t()
+        }
   def make_lenses(%{} = structure) when is_map(structure) do
     for key <- Map.keys(structure), into: %{} do
       {key, Lens.make_lens(key)}
@@ -90,11 +93,13 @@ defmodule Lens do
   defmacro deflenses(fields) do
     quote do
       Module.register_attribute(__MODULE__, :struct_fields, accumulate: true)
+
       for field <- unquote(fields) do
         Module.put_attribute(__MODULE__, :struct_fields, field)
       end
 
-      Module.eval_quoted(__ENV__,
+      Module.eval_quoted(
+        __ENV__,
         [
           Lens.__defstruct__(@struct_fields),
           Lens.__deflenses__(@struct_fields)
@@ -115,11 +120,11 @@ defmodule Lens do
       end
     else
       for field <- fields do
-          quote do
-            def unquote(:"#{field}_lens")() do
-              Lens.make_lens(unquote(field))
-            end
+        quote do
+          def unquote(:"#{field}_lens")() do
+            Lens.make_lens(unquote(field))
           end
+        end
       end
     end
   end
@@ -128,6 +133,7 @@ defmodule Lens do
   def __defstruct__(fields) do
     quote do
       defstruct unquote(Macro.escape(fields))
+
       defimpl Lensable, for: __MODULE__ do
         def getter(s, x), do: Map.get(s, x)
         def setter(s, x, f), do: Map.put(s, x, f)
@@ -148,7 +154,7 @@ defmodule Lens do
       iex> bad_index |> Focus.view([1,2,3])
       nil
   """
-  @spec idx(number) :: Lens.t
+  @spec idx(number) :: Lens.t()
   def idx(num) when is_number(num), do: make_lens(num)
 
   defimpl Focusable do
@@ -168,7 +174,7 @@ defmodule Lens do
         iex> Focus.view(name_lens, marge)
         "Marge"
     """
-    @spec view(Lens.t, Types.traversable) :: any | nil
+    @spec view(Lens.t(), Types.traversable()) :: any | nil
     def view(%Lens{get: get}, structure), do: get.(structure)
 
     @doc """
@@ -181,7 +187,7 @@ defmodule Lens do
         iex> Focus.over(name_lens, marge, &String.upcase/1)
         %{name: "MARGE", address: %{street: "123 Fake St.", city: "Springfield"}}
     """
-    @spec over(Lens.t, Types.traversable, (any -> any)) :: Types.traversable
+    @spec over(Lens.t(), Types.traversable(), (any -> any)) :: Types.traversable()
     def over(%Lens{put: setter} = lens, structure, f) do
       with {:ok, d} <- Lens.safe_view(lens, structure) do
         setter.(structure).(f.(d))
@@ -205,7 +211,7 @@ defmodule Lens do
         iex> Focus.set(composed, marge, "42 Wallaby Way")
         %{name: "Marge", address: %{street: "42 Wallaby Way", city: "Springfield"}}
     """
-    @spec set(Lens.t, Types.traversable, any) :: Types.traversable
+    @spec set(Lens.t(), Types.traversable(), any) :: Types.traversable()
     def set(lens, structure, val) do
       over(lens, structure, fn _ -> val end)
     end
@@ -222,12 +228,14 @@ defmodule Lens do
       iex> Lens.safe_view(name_lens, marge)
       {:ok, "Marge"}
   """
-  @spec safe_view(Lens.t, Types.traversable) :: {:error, {:lens, :bad_path}} | {:error, {:lens, :bad_data_structure}} | {:ok, any}
+  @spec safe_view(Lens.t(), Types.traversable()) ::
+          {:error, {:lens, :bad_path}} | {:error, {:lens, :bad_data_structure}} | {:ok, any}
   def safe_view(%Lens{} = lens, structure) do
     res = Focus.view(lens, structure)
+
     case res do
       {:error, err} -> {:error, err}
-      _   -> {:ok, res}
+      _ -> {:ok, res}
     end
   end
 end

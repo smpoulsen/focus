@@ -9,9 +9,9 @@ defmodule PrismTest do
       address: %{
         locale: %{
           number: 123,
-          street: "Fake St.",
+          street: "Fake St."
         },
-        city: "Springfield",
+        city: "Springfield"
       },
       list: [2, 4, 8, 16, 32],
       tuple: {:a, :b, :c},

@@ -2,23 +2,26 @@ defmodule Focus.Mixfile do
   use Mix.Project
 
   def project do
-    [app: :focus,
-     version: "0.3.5",
-     elixir: "~> 1.4",
-     build_embedded: Mix.env == :prod,
-     consolidate_protocols: Mix.env != :test,
-     start_permanent: Mix.env == :prod,
-     description: description(),
-     package: package(),
-     deps: deps()]
+    [
+      app: :focus,
+      version: "0.3.5",
+      elixir: "~> 1.4",
+      build_embedded: Mix.env() == :prod,
+      consolidate_protocols: Mix.env() != :test,
+      start_permanent: Mix.env() == :prod,
+      description: description(),
+      package: package(),
+      deps: deps()
+    ]
   end
 
   def application do
-    extra_apps = case Mix.env() do
-                   :test -> [:stream_data]
-                   _ -> []
+    extra_apps =
+      case Mix.env() do
+        :test -> [:stream_data]
+        _ -> []
+      end
 
-    end
     [applications: [:logger | extra_apps]]
   end
 
@@ -43,7 +46,7 @@ defmodule Focus.Mixfile do
       licenses: ["BSD2"],
       maintainers: ["Sylvie Poulsen"],
       links: %{
-        "GitHub" => "https://github.com/smpoulsen/focus",
+        "GitHub" => "https://github.com/smpoulsen/focus"
       }
     ]
   end
