@@ -4,8 +4,8 @@ defmodule Focus.Mixfile do
   def project do
     [
       app: :focus,
-      version: "0.3.5",
-      elixir: "~> 1.4",
+      version: "0.4.0",
+      elixir: "~> 1.10",
       build_embedded: Mix.env() == :prod,
       consolidate_protocols: Mix.env() != :test,
       start_permanent: Mix.env() == :prod,

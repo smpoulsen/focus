@@ -1,5 +1,6 @@
 * v0.4.0
-+ Fix compiler warnings
++ Fix compiler warnings and general cleanup
++ Compatibility testing on permutations of three most recent Elixir and Erlang releases
 
 * v0.3.1
 + Add pipeline-able versions of ~Focus.view/2~, ~Focus.set/3~, ~Focus.over/3~
