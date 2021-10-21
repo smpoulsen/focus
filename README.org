@@ -1,5 +1,6 @@
 * Focus
-[[https://img.shields.io/hexpm/v/focus.svg]]
+[[https://hex.pm/packages/focus][https://img.shields.io/hexpm/v/focus.svg]]
+[[https://github.com/smpoulsen/focus/actions/workflows/test.yml][https://github.com/smpoulsen/focus/actions/workflows/test.yml/badge.svg]]
 
 #+ATTR_HTML: :style margin-left: auto; margin-right: auto;
 [[img/focus_lens_prism.png]]
