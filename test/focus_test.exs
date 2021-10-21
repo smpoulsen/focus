@@ -9,9 +9,9 @@ defmodule FocusTest do
       address: %{
         locale: %{
           number: 123,
-          street: "Fake St.",
+          street: "Fake St."
         },
-        city: "Springfield",
+        city: "Springfield"
       },
       list: [2, 4, 8, 16, 32],
       tuple: {:a, :b, :c},
@@ -26,10 +26,11 @@ defmodule FocusTest do
   test "Composing set doesn't add new keys", %{test_structure: test_structure} do
     lenses = Lens.make_lenses(test_structure)
 
-    updated = lenses.address
-    ~> lenses.name
-    ~> lenses.name
-    |> Focus.set(test_structure, "Test")
+    updated =
+      lenses.address
+      ~> lenses.name
+      ~> lenses.name
+      |> Focus.set(test_structure, "Test")
 
     assert updated == {:error, {:lens, :bad_path}}
   end

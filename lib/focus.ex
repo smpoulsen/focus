@@ -37,10 +37,10 @@ defmodule Focus do
       ...> |> Focus.view(address_lens)
       %{street: "123 Fake St.", city: "Springfield"}
   """
-  @spec view(Types.optic, Types.traversable) :: any | nil
-  @spec view(Types.traversable, Types.optic) :: any | nil
-  def view(optic = %{get: _, put: _}, structure), do: Focusable.view(optic, structure)
-  def view(structure, optic = %{get: _, put: _}), do: Focusable.view(optic, structure)
+  @spec view(Types.optic() | Types.traversable(), Types.traversable() | Types.optic()) ::
+          any | nil
+  def view(%{get: _, put: _} = optic, structure), do: Focusable.view(optic, structure)
+  def view(structure, %{get: _, put: _} = optic), do: Focusable.view(optic, structure)
 
   @doc """
   Wrapper around Focusable.over/3
@@ -77,10 +77,13 @@ defmodule Focus do
         }
       }
   """
-  @spec over(Types.optic, Types.traversable, ((any) -> any)) :: Types.traversable
-  @spec over(Types.traversable, Types.optic, ((any) -> any)) :: Types.traversable
-  def over(optic = %{get: _, put: _}, structure, f), do: Focusable.over(optic, structure, f)
-  def over(structure, optic = %{get: _, put: _}, f), do: Focusable.over(optic, structure, f)
+  @spec over(
+          Types.optic() | Types.traversable(),
+          Types.traversable() | Types.optic(),
+          (any -> any)
+        ) :: Types.traversable()
+  def over(%{get: _, put: _} = optic, structure, f), do: Focusable.over(optic, structure, f)
+  def over(structure, %{get: _, put: _} = optic, f), do: Focusable.over(optic, structure, f)
 
   @doc """
   Wrapper around Focusable.set/3
@@ -117,10 +120,10 @@ defmodule Focus do
     }
   }
   """
-  @spec set(Types.traversable, Types.optic, (any)) :: Types.traversable
-  @spec set(Types.optic, Types.traversable, any) :: Types.traversable
-  def set(optic = %{get: _, put: _}, structure, v), do: Focusable.set(optic, structure, v)
-  def set(structure, optic = %{get: _, put: _}, v), do: Focusable.set(optic, structure, v)
+  @spec set(Types.traversable() | Types.optic(), Types.optic() | Types.traversable(), any) ::
+          Types.traversable()
+  def set(%{get: _, put: _} = optic, structure, v), do: Focusable.set(optic, structure, v)
+  def set(structure, %{get: _, put: _} = optic, v), do: Focusable.set(optic, structure, v)
 
   @doc """
   Compose with most general lens on the left
@@ -140,13 +143,14 @@ defmodule Focus do
       iex> Focus.view(composed, marge)
       "123 Fake St."
   """
-  @spec compose(Types.optic, Types.optic) :: Types.optic
+  @spec compose(Types.optic(), Types.optic()) :: Types.optic()
   def compose(%{get: get_x, put: set_x}, %{get: get_y, put: set_y}) do
     %Lens{
       get: fn s ->
         case get_x.(s) do
           {:error, {:lens, :bad_path}} ->
             {:error, {:lens, :bad_path}}
+
           x ->
             get_y.(x)
         end
@@ -156,6 +160,7 @@ defmodule Focus do
           case get_x.(s) do
             {:error, {:lens, :bad_path}} ->
               {:error, {:lens, :bad_path}}
+
             x ->
               set_x.(s).(set_y.(x).(f))
           end
@@ -180,7 +185,7 @@ defmodule Focus do
       iex> address_lens ~> local_lens ~> street_lens |> Focus.view(marge)
       "Fake St."
   """
-  @spec (Types.optic) ~> (Types.optic) :: Types.optic
+  @spec Types.optic() ~> Types.optic() :: Types.optic()
   def x ~> y do
     compose(x, y)
   end
@@ -202,12 +207,12 @@ defmodule Focus do
       ...> |> Focus.view(bart)
       {"Bart", 10}
   """
-  @spec alongside(Types.optic, Types.optic) :: Types.optic
+  @spec alongside(Types.optic(), Types.optic()) :: Types.optic()
   def alongside(%{get: get_x, put: set_x}, %{get: get_y, put: set_y}) do
     %Lens{
       get: fn s ->
-      {get_x.(s), get_y.(s)}
-    end,
+        {get_x.(s), get_y.(s)}
+      end,
       put: fn s ->
         fn f ->
           {set_x.(s).(f), set_y.(s).(f)}
@@ -232,7 +237,7 @@ defmodule Focus do
       ...> |> Focus.view_list(homer)
       ["Homer", ["Bart", "Lisa", "Maggie"]]
   """
-  @spec view_list(list(Types.optic), Types.traversable) :: [any]
+  @spec view_list(list(Types.optic()), Types.traversable()) :: [any]
   def view_list(lenses, structure) when is_list(lenses) do
     for lens <- lenses do
       Focus.view(lens, structure)
@@ -252,12 +257,12 @@ defmodule Focus do
       iex> name |> Focus.has(%{name: "Homer"})
       true
   """
-  @spec has(Types.optic, Types.traversable) :: boolean
+  @spec has(Types.optic(), Types.traversable()) :: boolean
   def has(optic, structure) do
     case Focus.view(optic, structure) do
       nil -> false
       {:error, _} -> false
-      _   -> true
+      _ -> true
     end
   end
 
@@ -274,7 +279,7 @@ defmodule Focus do
       iex> name |> Focus.hasnt(%{name: "Homer"})
       false
   """
-  @spec hasnt(Types.optic, Types.traversable) :: boolean
+  @spec hasnt(Types.optic(), Types.traversable()) :: boolean
   def hasnt(optic, structure), do: !has(optic, structure)
 
   @doc """
@@ -294,7 +299,7 @@ defmodule Focus do
       iex> Focus.over(fst, states, &String.upcase(Atom.to_string(&1)))
       ["MARYLAND", :texas, :illinois]
   """
-  @spec fix_over(Types.optic, ((any) -> any)) :: ((Types.traversable) -> Types.traversable)
+  @spec fix_over(Types.optic(), (any -> any)) :: (Types.traversable() -> Types.traversable())
   def fix_over(%{get: _, put: _} = lens, f \\ fn x -> x end) when is_function(f) do
     fn structure ->
       Focus.over(lens, structure, f)
@@ -318,7 +323,7 @@ defmodule Focus do
       iex> Focus.over(fst, states, &String.upcase(Atom.to_string(&1)))
       ["MARYLAND", :texas, :illinois]
   """
-  @spec fix_set(Types.optic) :: ((Types.traversable, any) -> Types.traversable)
+  @spec fix_set(Types.optic()) :: (Types.traversable(), any -> Types.traversable())
   def fix_set(%{get: _, put: _} = lens) do
     fn structure, val ->
       Focus.set(lens, structure, val)
@@ -340,7 +345,7 @@ defmodule Focus do
       ...> |> Enum.map(&view_name.(&1))
       ["Homer", "Marge", "Bart"]
   """
-  @spec fix_view(Types.optic) :: (Types.traversable -> any)
+  @spec fix_view(Types.optic()) :: (Types.traversable() -> any)
   def fix_view(%{get: _, put: _} = optic) do
     fn structure ->
       Focus.view(optic, structure)

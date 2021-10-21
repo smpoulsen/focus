@@ -11,6 +11,7 @@ end
 defimpl Lensable, for: Map do
   def getter(s, x), do: Access.get(s, x, {:error, {:lens, :bad_path}})
   def setter({:error, {:lens, :bad_path}} = e), do: e
+
   def setter(s, x, f) do
     if Map.has_key?(s, x) do
       Map.put(s, x, f)
@@ -21,8 +22,9 @@ defimpl Lensable, for: Map do
 end
 
 defimpl Lensable, for: Tuple do
-  def getter({:error, _e} = error, _x), do:  error
+  def getter({:error, _e} = error, _x), do: error
   def getter(s, x), do: elem(s, x)
+
   def setter(s, x, f) do
     s
     |> Tuple.delete_at(x)
@@ -44,6 +46,7 @@ defimpl Lensable, for: List do
   end
 
   def setter([] = s, x, f), do: List.replace_at(s, x, f)
+
   def setter(s, x, f) do
     if Keyword.keyword?(s) do
       Keyword.put(s, x, f)
@@ -56,17 +59,19 @@ end
 defimpl Lensable, for: Any do
   @bad_data_structure_error {:error, {:lens, :bad_data_structure}}
   def getter(s, x) do
-    with %_type{} <- s do
-     Lensable.getter(Map.from_struct(s), x)
-    else
+    case s do
+      %_type{} -> Lensable.getter(Map.from_struct(s), x)
       _ -> @bad_data_structure_error
     end
   end
+
   def setter(s, x, f) do
-    with %type{} <- s do
-      struct(type, Lensable.setter(Map.from_struct(s), x, f))
-    else
-      _ -> @bad_data_structure_error
+    case s do
+      %type{} ->
+        struct(type, Lensable.setter(Map.from_struct(s), x, f))
+
+      _ ->
+        @bad_data_structure_error
     end
   end
 end
